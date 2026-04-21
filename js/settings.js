@@ -31,10 +31,42 @@ function applyMusicEnabled(enabled) {
   const audio = document.getElementById('bg-music');
   if (!audio) return;
   if (enabled) {
-    audio.play().catch(() => {}); // ignora se bloqueado pelo navegador
+    audio.play().catch(() => {});
   } else {
     audio.pause();
   }
+}
+
+// ── Tenta iniciar a música; se o navegador bloquear,
+//    registra listeners para a primeira interação do usuário ──
+function tryStartMusic(volume) {
+  const audio = document.getElementById('bg-music');
+  if (!audio) return;
+  audio.volume = volume / 100;
+
+  audio.play().then(() => {
+    // Tocou imediatamente — remove qualquer listener pendente
+    document.removeEventListener('click',      _musicUnlock);
+    document.removeEventListener('keydown',    _musicUnlock);
+    document.removeEventListener('touchstart', _musicUnlock);
+  }).catch(() => {
+    // Navegador bloqueou autoplay — aguarda primeira interação
+    document.addEventListener('click',      _musicUnlock, { once: true });
+    document.addEventListener('keydown',    _musicUnlock, { once: true });
+    document.addEventListener('touchstart', _musicUnlock, { once: true, passive: true });
+  });
+}
+
+function _musicUnlock() {
+  const audio  = document.getElementById('bg-music');
+  const enabled = document.getElementById('chk-music')?.checked ?? true;
+  if (audio && enabled && audio.paused) {
+    audio.play().catch(() => {});
+  }
+  // Remove os outros listeners caso mais de um tenha sido registrado
+  document.removeEventListener('click',      _musicUnlock);
+  document.removeEventListener('keydown',    _musicUnlock);
+  document.removeEventListener('touchstart', _musicUnlock);
 }
 
 // ── Abre / fecha o modal de settings ──
@@ -54,25 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Sincroniza UI do modal
   document.getElementById('chk-light-theme').checked = s.theme === 'light';
-  document.getElementById('chk-music').checked = s.musicEnabled;
-  document.getElementById('music-volume').value = s.volume;
-  document.getElementById('volume-pct').textContent = s.volume + '%';
+  document.getElementById('chk-music').checked        = s.musicEnabled;
+  document.getElementById('music-volume').value       = s.volume;
+  document.getElementById('volume-pct').textContent   = s.volume + '%';
 
-  // Aplica volume no player de áudio
+  // Aplica volume
   applyVolume(s.volume);
 
-  // A maioria dos navegadores bloqueia autoplay sem interação do usuário.
-  // Esperamos o primeiro clique em qualquer lugar para iniciar a música.
+  // Tenta iniciar a música assim que a página carrega
   if (s.musicEnabled) {
-    const startMusic = () => {
-      const audio = document.getElementById('bg-music');
-      if (audio && audio.paused) {
-        audio.volume = s.volume / 100;
-        audio.play().catch(() => {});
-      }
-      document.removeEventListener('click', startMusic);
-    };
-    document.addEventListener('click', startMusic);
+    tryStartMusic(s.volume);
   }
 
   // ── Botão de configurações ──
@@ -95,7 +118,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('chk-music').addEventListener('change', e => {
     const enabled = e.target.checked;
     localStorage.setItem('s_music', enabled);
-    applyMusicEnabled(enabled);
+    if (enabled) {
+      tryStartMusic(parseInt(document.getElementById('music-volume').value));
+    } else {
+      const audio = document.getElementById('bg-music');
+      if (audio) audio.pause();
+    }
   });
 
   // ── Slider de volume ──
@@ -105,10 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
     applyVolume(v);
     localStorage.setItem('s_volume', v);
 
-    // Se a música está ativada mas pausada (ainda aguardando interação),
-    // o movimento do slider já conta como interação — inicia a música
-    const enabled = document.getElementById('chk-music').checked;
+    // Mexer no slider conta como interação — inicia se estiver pausada
     const audio = document.getElementById('bg-music');
+    const enabled = document.getElementById('chk-music').checked;
     if (enabled && audio && audio.paused) {
       audio.play().catch(() => {});
     }
