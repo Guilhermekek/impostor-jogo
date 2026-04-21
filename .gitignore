@@ -1,0 +1,14 @@
+# Credenciais Firebase — NÃO commitar!
+firebase-config.js
+
+# Dependências
+node_modules/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.iml
