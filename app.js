@@ -519,7 +519,7 @@ async function submitGuess() {
   const guess = document.getElementById('guess-input').value.trim();
   if (!guess) { toast('Digite uma palavra!'); return; }
 
-  const pair    = WORD_PAIRS[S.roomData.wordPairIndex];
+  const pair    = getWordPair(S.roomData);
   const correct = normalize(guess) === normalize(pair.word);
 
   closeGuessModal();
