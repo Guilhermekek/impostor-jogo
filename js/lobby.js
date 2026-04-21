@@ -98,6 +98,27 @@ function enterLobby() {
   screen('lobby');
 }
 
+async function leaveLobby() {
+  if (!roomRef) { screen('home'); return; }
+
+  if (S.isHost) {
+    // Host apaga a sala inteira
+    roomRef.off();
+    await roomRef.remove();
+  } else {
+    // Convidado remove apenas a si mesmo
+    roomRef.off();
+    await roomRef.child(`players/${S.playerId}`).remove();
+  }
+
+  roomRef = null;
+  S.roomCode = null;
+  S.isHost = false;
+  S.roomData = null;
+  S.prevGameState = null;
+  screen('home');
+}
+
 function renderLobby(players) {
   const el = document.getElementById('lobby-players');
   const hostId = S.roomData?.config?.host;

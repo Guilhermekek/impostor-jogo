@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ── Lobby ──
+  document.getElementById('btn-leave-lobby').addEventListener('click', leaveLobby);
   document.getElementById('btn-copy').addEventListener('click', () => {
     navigator.clipboard.writeText(S.roomCode)
       .then(() => toast('Código copiado! ✓'))

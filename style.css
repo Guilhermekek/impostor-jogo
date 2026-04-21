@@ -676,6 +676,24 @@ input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
   font-size: .9rem;
 }
 
+/* ── BACK BUTTON ── */
+.btn-back {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  font-family: inherit;
+  transition: color .18s;
+}
+.btn-back:hover { color: var(--text); }
+
 /* ── SETTINGS FAB ── */
 .settings-fab {
   position: fixed;
