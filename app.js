@@ -175,7 +175,8 @@ async function joinRoom() {
   if (!snap.exists()) { toast('Sala não encontrada!'); return; }
 
   const data = snap.val();
-  if (data.state !== 'lobby') { toast('Jogo já iniciado nessa sala!'); return; }
+  const midGame = data.state === 'playing';
+  if (data.state !== 'lobby' && !midGame) { toast('Jogo já iniciado nessa sala!'); return; }
 
   S.playerId = getPlayerId();
   S.playerName = name;
@@ -184,9 +185,21 @@ async function joinRoom() {
   roomRef = db.ref(`rooms/${code}`);
 
   await roomRef.child(`players/${S.playerId}`).set({
-    name, isAlive: true, isConnected: true, joinedAt: Date.now()
+    name, isAlive: true, isConnected: true, joinedAt: Date.now(),
+    midGameJoin: midGame,
   });
   roomRef.child(`players/${S.playerId}/isConnected`).onDisconnect().set(false);
+
+  if (midGame) {
+    S.midGameJoin = true;
+    // Notifica o host
+    const sysKey = roomRef.child('messages').push().key;
+    await roomRef.child(`messages/${sysKey}`).set({
+      type: 'system',
+      text: `🆕 ${name} entrou na partida!`,
+      ts: Date.now(),
+    });
+  }
 
   enterLobby();
   listenRoom();
@@ -343,7 +356,9 @@ function getNextTurnPlayerId(data) {
     .sort((a, b) => a[1].joinedAt - b[1].joinedAt);
   if (!ordered.length) return null;
   const idx = ordered.findIndex(([id]) => id === data.turnPlayerId);
-  return ordered[(idx + 1) % ordered.length][0];
+  // Se o jogador atual foi removido (idx === -1), começa do primeiro
+  const nextIdx = (idx + 1) % ordered.length;
+  return ordered[nextIdx][0];
 }
 
 async function advanceTurn(data) {
@@ -444,11 +459,24 @@ function renderStrip(players) {
   const el = document.getElementById('g-players');
   el.innerHTML = '';
   Object.entries(players || {}).forEach(([id, p]) => {
-    if (p.isConnected === false) return;
+    if (p.isConnected === false && p.kicked) return;
     const chip = document.createElement('div');
     chip.className = 'p-chip' + (p.isAlive ? '' : ' dead');
-    chip.innerHTML = `<div class="av">${initial(p.name)}</div><span>${escHtml(p.name)}${id === S.playerId ? ' (você)' : ''}</span>`;
+    const isMe = id === S.playerId;
+    chip.innerHTML = `
+      <div class="av">${initial(p.name)}</div>
+      <span>${escHtml(p.name)}${isMe ? ' (você)' : ''}</span>
+      ${S.isHost && !isMe && p.isAlive ? `<button class="kick-btn" data-id="${id}" title="Remover jogador">×</button>` : ''}
+    `;
     el.appendChild(chip);
+  });
+
+  // Event listeners para kick
+  el.querySelectorAll('.kick-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      kickPlayer(btn.dataset.id);
+    });
   });
 }
 
@@ -567,8 +595,7 @@ async function sendAnswer() {
 
   const msgKey = roomRef.child('messages').push().key;
 
-  // Mark answerer as acted, check round complete
-  const { newActed, allActed } = actorUpdate(S.playerId, S.roomData);
+  // Resposta NÃO conta como turno do respondedor — apenas avança o turno
   const answerUpdates = {
     [`messages/${msgKey}`]: {
       playerId: S.playerId, playerName: S.playerName,
@@ -576,18 +603,7 @@ async function sendAnswer() {
     },
     turnPlayerId: getNextTurnPlayerId(S.roomData),
     pendingAnswer: null,
-    roundActed: newActed,
   };
-  if (allActed) {
-    answerUpdates['votingEnabled'] = true;
-    answerUpdates['roundActed']    = null;
-    const sysKey2 = roomRef.child('messages').push().key;
-    answerUpdates[`messages/${sysKey2}`] = {
-      type: 'system',
-      text: '🗳️ Todos falaram! Votação habilitada.',
-      ts: Date.now() + 1,
-    };
-  }
   await roomRef.update(answerUpdates);
 
   document.getElementById('t-answer').value = '';
@@ -626,6 +642,50 @@ async function submitGuess() {
     impostorGuess: guess,
     impostorGuessedCorrectly: correct,
   });
+}
+
+// ══════════════════════════════════════════════
+//  PLAYER MANAGEMENT (host)
+// ══════════════════════════════════════════════
+async function kickPlayer(playerId) {
+  if (!S.isHost) return;
+  const players    = S.roomData?.players || {};
+  const playerName = players[playerId]?.name || '???';
+  if (!confirm(`Remover "${playerName}" da partida?`)) return;
+
+  const updates = {
+    [`players/${playerId}/isAlive`]:     false,
+    [`players/${playerId}/isConnected`]: false,
+    [`players/${playerId}/kicked`]:      true,
+  };
+
+  // Se era a vez dele, avança o turno
+  if (S.roomData.turnPlayerId === playerId) {
+    const fakeData = {
+      ...S.roomData,
+      players: {
+        ...players,
+        [playerId]: { ...players[playerId], isAlive: false, isConnected: false }
+      }
+    };
+    updates['turnPlayerId'] = getNextTurnPlayerId(fakeData);
+    updates['pendingAnswer'] = null;
+  }
+
+  // Se estava aguardando resposta dele, cancela
+  if (S.roomData.pendingAnswer?.targetId === playerId) {
+    updates['pendingAnswer'] = null;
+  }
+
+  // Remove do roundActed para não bloquear a lógica
+  const sysKey = roomRef.child('messages').push().key;
+  updates[`messages/${sysKey}`] = {
+    type: 'system',
+    text: `👢 ${playerName} foi removido pelo host.`,
+    ts: Date.now(),
+  };
+
+  await roomRef.update(updates);
 }
 
 // ══════════════════════════════════════════════
@@ -892,8 +952,14 @@ function handleUpdate(data, changed) {
       break;
 
     case 'playing':
-      if (changed) showGame(data);
-      else if (cur === 'screen-game') updateGame(data);
+      if (S.midGameJoin) {
+        S.midGameJoin = false;
+        showRoleReveal(data); // mostra a palavra para quem entrou no meio
+      } else if (changed) {
+        showGame(data);
+      } else if (cur === 'screen-game') {
+        updateGame(data);
+      }
       break;
 
     case 'voting':
