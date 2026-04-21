@@ -16,6 +16,7 @@ const S = {
 
 let db, roomRef;
 let currentTab = 'statement';
+let prevActor   = null;
 
 // ── FIREBASE INIT ──────────────────────────────
 function initFirebase() {
@@ -63,6 +64,51 @@ function toast(msg) {
 function screen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
+}
+
+// ── SOUND & POPUP ──────────────────────────────
+function playTurnSound() {
+  try {
+    const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(660, ctx.currentTime);
+    osc.frequency.setValueAtTime(900, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.55);
+  } catch(e) {}
+}
+
+function showTurnPopup(icon, label) {
+  const popup = document.getElementById('turn-popup');
+  document.getElementById('turn-popup-icon').textContent = icon;
+  document.getElementById('turn-popup-text').textContent = label;
+  popup.style.display = 'flex';
+  clearTimeout(popup._t);
+  // Re-trigger animation
+  const inner = popup.querySelector('.turn-popup-inner');
+  inner.style.animation = 'none';
+  inner.offsetHeight; // reflow
+  inner.style.animation = '';
+  popup._t = setTimeout(() => { popup.style.display = 'none'; }, 1800);
+}
+
+// Who needs to act right now (turn holder or pending answerer)
+function whoNeedsToAct(data) {
+  return data.pendingAnswer ? data.pendingAnswer.targetId : data.turnPlayerId;
+}
+
+// Returns updated roundActed and whether all alive players have acted
+function actorUpdate(actorId, roomData) {
+  const newActed = { ...(roomData.roundActed || {}), [actorId]: true };
+  const alive    = alivePlayers(roomData.players || {});
+  const allActed = alive.length > 0 && alive.every(([id]) => newActed[id]);
+  return { newActed, allActed };
 }
 
 function getWordPair(data) {
@@ -223,6 +269,8 @@ async function startGame() {
     impostorId,
     turnPlayerId: firstTurnId,
     pendingAnswer: null,
+    votingEnabled: false,
+    roundActed: null,
     readyPlayers: null,
     messages: null,
     votes: null,
@@ -304,13 +352,25 @@ async function advanceTurn(data) {
 }
 
 function renderTurnState(data) {
-  const players  = data.players || {};
-  const turnId   = data.turnPlayerId;
-  const pending  = data.pendingAnswer;
-  const isMyTurn = turnId === S.playerId && !pending;
+  const players    = data.players || {};
+  const turnId     = data.turnPlayerId;
+  const pending    = data.pendingAnswer;
+  const isMyTurn   = turnId === S.playerId && !pending;
   const isMyAnswer = pending?.targetId === S.playerId;
 
-  // Turn bar text
+  // ── Sound & popup when it becomes my turn ──
+  const currentActor = whoNeedsToAct(data);
+  if (currentActor === S.playerId && prevActor !== S.playerId) {
+    playTurnSound();
+    if (isMyAnswer) {
+      showTurnPopup('❓', 'RESPONDA!');
+    } else {
+      showTurnPopup('✨', 'SUA VEZ!');
+    }
+  }
+  prevActor = currentActor;
+
+  // ── Turn bar ──
   const bar = document.getElementById('turn-bar');
   if (isMyTurn) {
     bar.innerHTML = '<span style="color:var(--success)">✨ Sua vez!</span>';
@@ -322,10 +382,15 @@ function renderTurnState(data) {
     bar.innerHTML = `<span style="color:var(--muted)">⏳ Vez de ${escHtml(tName)}…</span>`;
   }
 
-  // Show correct action panel
-  document.getElementById('my-turn-area').style.display = isMyTurn  ? 'block' : 'none';
-  document.getElementById('f-answer').style.display      = isMyAnswer ? 'flex'  : 'none';
-  document.getElementById('waiting-turn').style.display  = (!isMyTurn && !isMyAnswer) ? 'block' : 'none';
+  // ── Vote button: enabled only after full round ──
+  const voteBtn = document.getElementById('btn-call-vote');
+  voteBtn.disabled = !data.votingEnabled;
+  voteBtn.title    = data.votingEnabled ? '' : 'Aguarde todos falarem para votar';
+
+  // ── Action panels ──
+  document.getElementById('my-turn-area').style.display = isMyTurn   ? 'block' : 'none';
+  document.getElementById('f-answer').style.display     = isMyAnswer ? 'flex'  : 'none';
+  document.getElementById('waiting-turn').style.display = (!isMyTurn && !isMyAnswer) ? 'block' : 'none';
 
   if (isMyAnswer && pending) {
     document.getElementById('answer-prompt').textContent =
@@ -465,12 +530,27 @@ async function sendMsg(type) {
   };
 
   if (type === 'statement') {
+    // Mark sender as acted, check if round complete
+    const { newActed, allActed } = actorUpdate(S.playerId, S.roomData);
     updates['turnPlayerId'] = getNextTurnPlayerId(S.roomData);
     updates['pendingAnswer'] = null;
+    updates['roundActed'] = newActed;
+    if (allActed) {
+      updates['votingEnabled'] = true;
+      updates['roundActed']    = null;
+      const sysId = 'sys_' + (Date.now() + 1);
+      updates[`messages/${sysId}`] = {
+        type: 'system',
+        text: '🗳️ Todos falaram! Votação habilitada.',
+        ts: Date.now() + 1,
+      };
+    }
   } else {
+    // Asker uses their turn — mark as acted but wait for answer
+    const { newActed } = actorUpdate(S.playerId, S.roomData);
+    updates['roundActed'] = newActed;
     updates['pendingAnswer'] = {
-      targetId,
-      targetName,
+      targetId, targetName,
       askerName: S.playerName,
       questionText: text,
     };
@@ -485,15 +565,28 @@ async function sendAnswer() {
 
   const msgId = 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
 
-  // Atomic update: answer message + clear pending + advance turn
-  await roomRef.update({
+  // Mark answerer as acted, check round complete
+  const { newActed, allActed } = actorUpdate(S.playerId, S.roomData);
+  const answerUpdates = {
     [`messages/${msgId}`]: {
       playerId: S.playerId, playerName: S.playerName,
       type: 'answer', text, ts: Date.now(),
     },
     turnPlayerId: getNextTurnPlayerId(S.roomData),
     pendingAnswer: null,
-  });
+    roundActed: newActed,
+  };
+  if (allActed) {
+    answerUpdates['votingEnabled'] = true;
+    answerUpdates['roundActed']    = null;
+    const sysId = 'sys_' + (Date.now() + 1);
+    answerUpdates[`messages/${sysId}`] = {
+      type: 'system',
+      text: '🗳️ Todos falaram! Votação habilitada.',
+      ts: Date.now() + 1,
+    };
+  }
+  await roomRef.update(answerUpdates);
 
   document.getElementById('t-answer').value = '';
 }
@@ -538,6 +631,7 @@ async function submitGuess() {
 // ══════════════════════════════════════════════
 async function callVote() {
   if (S.roomData?.state !== 'playing') return;
+  if (!S.roomData?.votingEnabled) { toast('Aguarde todos falarem antes de votar!'); return; }
   await roomRef.update({ state: 'voting', voteInitiator: S.playerId, votes: null });
   sysMsg(`${S.playerName} iniciou uma votação!`);
 }
@@ -676,6 +770,8 @@ async function continueGame() {
     round: (S.roomData?.round || 1) + 1,
     turnPlayerId: nextTurnId,
     pendingAnswer: null,
+    votingEnabled: false,
+    roundActed: null,
     votes: null, voteInitiator: null,
     eliminatedThisRound: null, tiedVote: null,
   });
