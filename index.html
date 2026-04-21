@@ -182,6 +182,49 @@
   </div>
 </div>
 
+<!-- Settings FAB -->
+<button id="btn-settings" class="settings-fab" title="Configurações">⚙️</button>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <h2 style="text-align:center;margin-bottom:4px">⚙️ Configurações</h2>
+
+    <!-- Música -->
+    <div class="settings-section">
+      <div class="settings-section-title">🎵 Música de fundo</div>
+      <label class="toggle-row">
+        <input type="checkbox" id="chk-music" checked>
+        <span class="toggle-track"></span>
+        Música ativada
+      </label>
+      <div class="volume-row">
+        <span>🔈</span>
+        <input type="range" id="music-volume" min="0" max="100" value="40" class="volume-slider">
+        <span>🔊</span>
+        <span id="volume-pct" class="volume-pct">40%</span>
+      </div>
+    </div>
+
+    <!-- Tema -->
+    <div class="settings-section">
+      <div class="settings-section-title">🎨 Aparência</div>
+      <label class="toggle-row">
+        <input type="checkbox" id="chk-light-theme">
+        <span class="toggle-track"></span>
+        Tema claro ☀️
+      </label>
+    </div>
+
+    <button class="btn btn-secondary" id="btn-close-settings">Fechar</button>
+  </div>
+</div>
+
+<!-- Background Music -->
+<audio id="bg-music" loop preload="auto">
+  <source src="assets/soundtrack.mp3" type="audio/mpeg">
+</audio>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -201,6 +244,7 @@
 <script src="js/game.js"></script>
 <script src="js/voting.js"></script>
 <script src="js/results.js"></script>
+<script src="js/settings.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
