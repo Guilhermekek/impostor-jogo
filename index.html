@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>O Impostor</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕵️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════ HOME ══════════════ -->
+<div id="screen-home" class="screen active">
+  <div class="container">
+    <div>
+      <h1 class="title">🕵️ O Impostor</h1>
+      <p class="subtitle">Um está entre vocês…</p>
+    </div>
+    <div class="card">
+      <input type="text" id="inp-name" placeholder="Seu nome" maxlength="20" autocomplete="off">
+      <button class="btn btn-primary" id="btn-create">Criar Sala</button>
+      <div class="divider">ou entre em uma sala</div>
+      <input type="text" id="inp-code" placeholder="Código da sala (ex: AB3C)" maxlength="4" style="text-transform:uppercase;letter-spacing:.15em;font-weight:700;text-align:center">
+      <button class="btn btn-secondary" id="btn-join">Entrar na Sala</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ LOBBY ══════════════ -->
+<div id="screen-lobby" class="screen">
+  <div class="container">
+    <h2>Sala</h2>
+    <div class="room-code-display">
+      <span id="show-code"></span>
+      <button class="btn-ghost" id="btn-copy" title="Copiar código">📋</button>
+    </div>
+    <p class="hint">Compartilhe o código com seus amigos</p>
+
+    <div id="lobby-players" class="players-list"></div>
+
+    <div id="host-settings" class="settings-panel" style="display:none">
+      <h3>Configurações</h3>
+      <div class="setting-row">
+        <label class="setting-label">Categoria das palavras</label>
+        <select id="sel-category"></select>
+      </div>
+      <label class="toggle-row">
+        <input type="checkbox" id="chk-similar">
+        <span class="toggle-track"></span>
+        Impostor recebe palavra similar
+      </label>
+    </div>
+
+    <div id="host-start-area" style="display:none">
+      <button class="btn btn-primary" id="btn-start">Iniciar Jogo</button>
+    </div>
+    <p id="lobby-waiting" class="waiting-label" style="display:none">Aguardando o host iniciar…</p>
+  </div>
+</div>
+
+<!-- ══════════════ ROLE REVEAL ══════════════ -->
+<div id="screen-role" class="screen">
+  <div class="container">
+    <div class="role-card">
+      <div id="role-icon" class="role-icon"></div>
+      <h2 id="role-title"></h2>
+      <p id="role-desc"></p>
+      <div class="word-display" id="word-display"></div>
+      <p class="hint" style="font-size:.85rem">Memorize e <strong>não revele</strong> a palavra!</p>
+      <button class="btn btn-primary" id="btn-ready">Estou pronto!</button>
+    </div>
+    <p id="role-waiting" class="waiting-label" style="display:none">Aguardando todos ficarem prontos…</p>
+  </div>
+</div>
+
+<!-- ══════════════ GAME ══════════════ -->
+<div id="screen-game" class="screen">
+  <!-- Header -->
+  <div class="game-header">
+    <div class="round-badge">Rodada <span id="g-round">1</span></div>
+    <div class="word-badge" id="g-word-badge"></div>
+    <button class="btn btn-warning" id="btn-guess" style="display:none">🎯 Chutar</button>
+    <button class="btn btn-danger" id="btn-call-vote">📢 Votar</button>
+  </div>
+
+  <!-- Guess modal -->
+  <div id="guess-modal" class="modal-overlay" style="display:none">
+    <div class="modal-box">
+      <div style="font-size:2.5rem;text-align:center">🎯</div>
+      <h3 style="text-align:center">Chutar a palavra secreta</h3>
+      <p style="text-align:center;color:var(--muted);font-size:.9rem">Se acertar, você vence. Se errar, os jogadores vencem!</p>
+      <input type="text" id="guess-input" placeholder="Qual é a palavra secreta?" maxlength="60" autocomplete="off">
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" id="btn-confirm-guess">Confirmar chute</button>
+        <button class="btn btn-secondary" id="btn-cancel-guess">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Players strip -->
+  <div class="players-strip" id="g-players"></div>
+
+  <!-- Turn bar -->
+  <div class="turn-bar" id="turn-bar"></div>
+
+  <!-- Messages -->
+  <div class="messages-area" id="g-messages"></div>
+
+  <!-- Action area -->
+  <div class="action-area">
+    <!-- My turn: statement or question -->
+    <div id="my-turn-area" style="display:none">
+      <div class="tabs" id="action-tabs">
+        <button class="tab on" data-t="statement">💬 Declaração</button>
+        <button class="tab" data-t="question">❓ Pergunta</button>
+      </div>
+      <div id="f-statement" class="form">
+        <textarea id="t-statement" placeholder="Escreva algo relacionado à palavra…" maxlength="240"></textarea>
+        <button class="btn btn-primary" id="btn-send-s">Enviar</button>
+      </div>
+      <div id="f-question" class="form" style="display:none">
+        <select id="sel-target"></select>
+        <textarea id="t-question" placeholder="Sua pergunta para esse jogador…" maxlength="240"></textarea>
+        <button class="btn btn-primary" id="btn-send-q">Perguntar</button>
+      </div>
+    </div>
+
+    <!-- Answer pending question -->
+    <div id="f-answer" class="form" style="display:none">
+      <div class="answer-prompt" id="answer-prompt"></div>
+      <textarea id="t-answer" placeholder="Sua resposta…" maxlength="240"></textarea>
+      <button class="btn btn-primary" id="btn-send-a">Responder</button>
+    </div>
+
+    <!-- Waiting for others -->
+    <div id="waiting-turn" class="waiting-turn" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ══════════════ VOTING ══════════════ -->
+<div id="screen-voting" class="screen">
+  <div class="container">
+    <h2>🗳️ Votação</h2>
+    <p class="hint">Quem é o impostor?</p>
+    <div id="vote-grid" class="vote-grid"></div>
+    <p id="vote-status" class="vote-status"></p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+      <button class="btn btn-primary" id="btn-force-result" style="display:none">Encerrar votação agora (Host)</button>
+      <button class="btn btn-secondary" id="btn-cancel-vote" style="display:none">Cancelar votação</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ROUND RESULT ══════════════ -->
+<div id="screen-result" class="screen">
+  <div class="container">
+    <div id="result-card" class="big-card"></div>
+    <div id="result-host-actions" class="host-actions" style="display:none">
+      <button class="btn btn-primary" id="btn-continue">Continuar com a mesma palavra</button>
+      <button class="btn btn-secondary" id="btn-end">Encerrar jogo</button>
+    </div>
+    <p id="result-waiting" class="waiting-label" style="display:none">Aguardando o host decidir…</p>
+  </div>
+</div>
+
+<!-- ══════════════ GAME OVER ══════════════ -->
+<div id="screen-gameover" class="screen">
+  <div class="container">
+    <div id="gameover-card" class="big-card"></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" id="btn-play-again">Jogar novamente</button>
+      <button class="btn btn-secondary" id="btn-home">Ir para o início</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Scripts -->
+<script src="words.js"></script>
+<script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
