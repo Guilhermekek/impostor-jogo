@@ -117,8 +117,8 @@ function getWordPair(data) {
 }
 
 function sysMsg(text) {
-  const id = 'sys_' + Date.now();
-  roomRef.child(`messages/${id}`).set({ type: 'system', text, ts: Date.now() });
+  const key = roomRef.child('messages').push().key;
+  roomRef.child(`messages/${key}`).set({ type: 'system', text, ts: Date.now() });
 }
 
 // ── ALIVE PLAYERS (array of [id, playerObj]) ──
@@ -469,7 +469,9 @@ function renderMessages(messages) {
   const area = document.getElementById('g-messages');
   const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 60;
 
-  const sorted = Object.values(messages || {}).sort((a, b) => a.ts - b.ts);
+  const sorted = Object.entries(messages || {})
+    .sort(([keyA], [keyB]) => keyA < keyB ? -1 : keyA > keyB ? 1 : 0)
+    .map(([, v]) => v);
   area.innerHTML = '';
   sorted.forEach(m => {
     const d = document.createElement('div');
@@ -516,11 +518,11 @@ async function sendMsg(type) {
     document.getElementById('t-question').value = '';
   }
 
-  const msgId = 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  const msgKey = roomRef.child('messages').push().key;
 
   // Atomic update: message + turn state together (avoids race condition)
   const updates = {
-    [`messages/${msgId}`]: {
+    [`messages/${msgKey}`]: {
       playerId: S.playerId, playerName: S.playerName,
       type, text,
       targetId: targetId || null,
@@ -538,8 +540,8 @@ async function sendMsg(type) {
     if (allActed) {
       updates['votingEnabled'] = true;
       updates['roundActed']    = null;
-      const sysId = 'sys_' + (Date.now() + 1);
-      updates[`messages/${sysId}`] = {
+      const sysKey2 = roomRef.child('messages').push().key;
+      updates[`messages/${sysKey2}`] = {
         type: 'system',
         text: '🗳️ Todos falaram! Votação habilitada.',
         ts: Date.now() + 1,
@@ -563,12 +565,12 @@ async function sendAnswer() {
   const text = document.getElementById('t-answer').value.trim();
   if (!text) { toast('Escreva sua resposta!'); return; }
 
-  const msgId = 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  const msgKey = roomRef.child('messages').push().key;
 
   // Mark answerer as acted, check round complete
   const { newActed, allActed } = actorUpdate(S.playerId, S.roomData);
   const answerUpdates = {
-    [`messages/${msgId}`]: {
+    [`messages/${msgKey}`]: {
       playerId: S.playerId, playerName: S.playerName,
       type: 'answer', text, ts: Date.now(),
     },
@@ -579,8 +581,8 @@ async function sendAnswer() {
   if (allActed) {
     answerUpdates['votingEnabled'] = true;
     answerUpdates['roundActed']    = null;
-    const sysId = 'sys_' + (Date.now() + 1);
-    answerUpdates[`messages/${sysId}`] = {
+    const sysKey2 = roomRef.child('messages').push().key;
+    answerUpdates[`messages/${sysKey2}`] = {
       type: 'system',
       text: '🗳️ Todos falaram! Votação habilitada.',
       ts: Date.now() + 1,
@@ -681,8 +683,19 @@ async function forceResult() {
 }
 
 async function cancelVote() {
-  await roomRef.update({ state: 'playing', votes: null, voteInitiator: null });
-  sysMsg('Votação cancelada.');
+  const sysKey = roomRef.child('messages').push().key;
+  await roomRef.update({
+    state: 'playing',
+    votes: null,
+    voteInitiator: null,
+    votingEnabled: false,
+    roundActed: null,
+    [`messages/${sysKey}`]: {
+      type: 'system',
+      text: '❌ Votação cancelada. Todos precisam falar novamente para reativar.',
+      ts: Date.now(),
+    },
+  });
 }
 
 async function processVotes(data) {
