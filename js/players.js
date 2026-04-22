@@ -2,14 +2,24 @@
 //  players.js — Renderização e gestão de jogadores
 // ══════════════════════════════════════════════
 
-function renderStrip(players) {
+// turnPlayerId: quem está jogando agora (para destacar em verde)
+function renderStrip(players, turnPlayerId) {
   const el = document.getElementById('g-players');
   el.innerHTML = '';
-  Object.entries(players || {}).forEach(([id, p]) => {
-    if (p.isConnected === false && p.kicked) return;
-    const chip = document.createElement('div');
-    chip.className = 'p-chip' + (p.isAlive ? '' : ' dead');
-    const isMe = id === S.playerId;
+
+  // Ordena pela ordem dos turnos (joinedAt)
+  const ordered = Object.entries(players || {})
+    .filter(([, p]) => !(p.isConnected === false && p.kicked))
+    .sort((a, b) => a[1].joinedAt - b[1].joinedAt);
+
+  ordered.forEach(([id, p]) => {
+    const chip  = document.createElement('div');
+    const isMe  = id === S.playerId;
+    const isActive = id === turnPlayerId && p.isAlive;
+    chip.className = 'p-chip'
+      + (p.isAlive ? '' : ' dead')
+      + (isActive  ? ' active' : '');
+
     chip.innerHTML = `
       <div class="av">${initial(p.name)}</div>
       <span>${escHtml(p.name)}${isMe ? ' (você)' : ''}</span>
@@ -46,6 +56,28 @@ async function kickPlayer(playerId) {
   const playerName = players[playerId]?.name || '???';
   if (!confirm(`Remover "${playerName}" da partida?`)) return;
 
+  const isImpostor = S.roomData.impostorId === playerId;
+
+  // ── Se o impostor for removido → fim de jogo ──
+  if (isImpostor) {
+    const sysKey = roomRef.child('messages').push().key;
+    await roomRef.update({
+      [`players/${playerId}/isAlive`]:     false,
+      [`players/${playerId}/isConnected`]: false,
+      [`players/${playerId}/kicked`]:      true,
+      state:          'gameOver',
+      winner:         'players',
+      impostorKicked: true,
+      [`messages/${sysKey}`]: {
+        type: 'system',
+        text: `👢 ${playerName} era o IMPOSTOR e foi removido! Jogadores vencem!`,
+        ts: Date.now(),
+      },
+    });
+    return;
+  }
+
+  // ── Kick normal (jogador comum) ──
   const updates = {
     [`players/${playerId}/isAlive`]:     false,
     [`players/${playerId}/isConnected`]: false,

@@ -19,6 +19,27 @@ function playTurnSound() {
   } catch(e) {}
 }
 
+// Som dramático de início de jogo — arpejo ascendente
+function playGameStartSound() {
+  try {
+    const ctx   = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [262, 330, 392, 523, 659]; // Dó, Mi, Sol, Dó, Mi
+    notes.forEach((freq, i) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'triangle';
+      const t = ctx.currentTime + i * 0.11;
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0.22, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+      osc.start(t);
+      osc.stop(t + 0.35);
+    });
+  } catch(e) {}
+}
+
 function showTurnPopup(icon, label) {
   const popup = document.getElementById('turn-popup');
   document.getElementById('turn-popup-icon').textContent = icon;

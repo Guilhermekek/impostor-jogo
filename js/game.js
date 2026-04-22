@@ -44,6 +44,7 @@ async function startGame() {
 }
 
 function showRoleReveal(data) {
+  playGameStartSound();
   const pair = getWordPair(data);
   const isImpostor = data.impostorId === S.playerId;
   const similarMode = data.config?.similarWordMode;
@@ -111,7 +112,7 @@ function showGame(data) {
   document.getElementById('btn-guess').style.display =
     (data.impostorId === S.playerId) ? 'block' : 'none';
 
-  renderStrip(data.players);
+  renderStrip(data.players, data.turnPlayerId);
   updateTargets(data.players);
   renderMessages(data.messages);
   renderTurnState(data);
@@ -120,7 +121,7 @@ function showGame(data) {
 
 function updateGame(data) {
   document.getElementById('g-round').textContent = data.round || 1;
-  renderStrip(data.players);
+  renderStrip(data.players, data.turnPlayerId);
   updateTargets(data.players);
   renderMessages(data.messages);
   renderTurnState(data);

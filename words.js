@@ -30,6 +30,16 @@ const CATEGORIES = {
     { word: "Filósofo",         similar: "Escritor" },
     { word: "Maquiador",        similar: "Cabeleireiro" },
     { word: "Astronomo",        similar: "Físico" },
+    { word: "Encanador",        similar: "Eletricista" },
+    { word: "Carpinteiro",      similar: "Marceneiro" },
+    { word: "Porteiro",         similar: "Recepcionista" },
+    { word: "Carteiro",         similar: "Entregador" },
+    { word: "Pedreiro",         similar: "Pintor de Obras" },
+    { word: "Lixeiro",          similar: "Gari" },
+    { word: "Dançarino",        similar: "Coreógrafo" },
+    { word: "Aeromoça",         similar: "Comissário de Bordo" },
+    { word: "Jardineiro",       similar: "Paisagista" },
+    { word: "Marinheiro",       similar: "Pescador" },
   ],
 
   "Lugares": [
@@ -63,6 +73,16 @@ const CATEGORIES = {
     { word: "Usina",            similar: "Refinaria" },
     { word: "Bunker",           similar: "Abrigo" },
     { word: "Ilha",             similar: "Península" },
+    { word: "Praça",            similar: "Boulevard" },
+    { word: "Planetário",       similar: "Observatório" },
+    { word: "Cartório",         similar: "Prefeitura" },
+    { word: "Posto de Saúde",   similar: "UPA" },
+    { word: "Tribunal",         similar: "Fórum" },
+    { word: "Estação de Trem",  similar: "Rodoviária" },
+    { word: "Aquário",          similar: "Jardim Botânico" },
+    { word: "Quartel",          similar: "Base Militar" },
+    { word: "Cânion",           similar: "Vale" },
+    { word: "Pântano",          similar: "Mangue" },
   ],
 
   "Transportes": [
@@ -87,6 +107,13 @@ const CATEGORIES = {
     { word: "Snowmobile",       similar: "Quad" },
     { word: "Hovercraft",       similar: "Jet Ski" },
     { word: "Bonde",            similar: "Monotrilho" },
+    { word: "Kart",             similar: "Quadriciclo" },
+    { word: "Limusine",         similar: "Sedan" },
+    { word: "Empilhadeira",     similar: "Guincho" },
+    { word: "Motorhome",        similar: "Trailer" },
+    { word: "Retroescavadeira", similar: "Trator" },
+    { word: "Betoneira",        similar: "Caminhão de Obras" },
+    { word: "Fusca",            similar: "Jipe" },
   ],
 
   "Fantasia & Aventura": [
@@ -188,6 +215,39 @@ const CATEGORIES = {
     { word: "Camelo",           similar: "Lhama" },
     { word: "Coral",            similar: "Alga" },
     { word: "Fogo",             similar: "Lava" },
+    { word: "Flamingo",         similar: "Garça" },
+    { word: "Tucano",           similar: "Papagaio" },
+    { word: "Abelha",           similar: "Vespa" },
+    { word: "Formiga",          similar: "Cupim" },
+    { word: "Camaleão",         similar: "Lagarto" },
+    { word: "Axolote",          similar: "Salamandra" },
+    { word: "Ornitorrinco",     similar: "Castor" },
+    { word: "Recife de Coral",  similar: "Fundo do Mar" },
+    { word: "Savana",           similar: "Cerrado" },
+    { word: "Cânion",           similar: "Desfiladeiro" },
+  ],
+
+  "Tecnologia": [
+    { word: "Celular",               similar: "Smartphone" },
+    { word: "Notebook",              similar: "Computador" },
+    { word: "Tablet",                similar: "iPad" },
+    { word: "Televisão",             similar: "Monitor" },
+    { word: "Videogame",             similar: "Console" },
+    { word: "Fone de Ouvido",        similar: "Caixa de Som" },
+    { word: "Drone",                 similar: "Helicóptero" },
+    { word: "Smartwatch",            similar: "Relógio Digital" },
+    { word: "Impressora",            similar: "Scanner" },
+    { word: "Roteador",              similar: "Modem" },
+    { word: "Instagram",             similar: "TikTok" },
+    { word: "WhatsApp",              similar: "Telegram" },
+    { word: "Inteligência Artificial", similar: "Robô" },
+    { word: "Realidade Virtual",     similar: "Realidade Aumentada" },
+    { word: "Criptomoeda",           similar: "NFT" },
+    { word: "Pendrive",              similar: "HD Externo" },
+    { word: "Microfone",             similar: "Câmera" },
+    { word: "Projetor",              similar: "Tela de Projeção" },
+    { word: "Carregador",            similar: "Power Bank" },
+    { word: "Teclado",               similar: "Mouse" },
   ],
 
   "Objetos": [
@@ -237,6 +297,7 @@ const CATEGORY_LIST = [
   "Comida & Bebida",
   "Animais & Natureza",
   "Objetos",
+  "Tecnologia",
 ];
 
 const CATEGORY_ICONS = {
@@ -249,4 +310,5 @@ const CATEGORY_ICONS = {
   "Comida & Bebida":     "🍕",
   "Animais & Natureza":  "🐾",
   "Objetos":             "🪄",
+  "Tecnologia":          "💻",
 };

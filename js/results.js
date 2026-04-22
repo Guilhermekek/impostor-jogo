@@ -55,11 +55,13 @@ function showGameOver(data) {
   const card = document.getElementById('gameover-card');
 
   const winPlayers = data.winner === 'players';
-  const guessCtx = data.impostorGuess
-    ? (data.impostorGuessedCorrectly
-        ? `O impostor chutou "<strong>${escHtml(data.impostorGuess)}</strong>" e acertou!`
-        : `O impostor chutou "<strong>${escHtml(data.impostorGuess)}</strong>" e errou!`)
-    : (winPlayers ? 'O impostor foi descoberto!' : 'O impostor enganou todo mundo!');
+  const guessCtx = data.impostorKicked
+    ? `👢 O impostor foi removido pelo host!`
+    : data.impostorGuess
+      ? (data.impostorGuessedCorrectly
+          ? `O impostor chutou "<strong>${escHtml(data.impostorGuess)}</strong>" e acertou!`
+          : `O impostor chutou "<strong>${escHtml(data.impostorGuess)}</strong>" e errou!`)
+      : (winPlayers ? 'O impostor foi descoberto!' : 'O impostor enganou todo mundo!');
 
   card.innerHTML = `
     <div class="big-icon">${winPlayers ? '🏆' : '🕵️'}</div>
