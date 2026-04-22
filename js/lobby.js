@@ -86,6 +86,19 @@ function enterLobby() {
     sel.appendChild(o);
   });
 
+  // Preenche select de número de impostores
+  const selImp = document.getElementById('sel-impostor-count');
+  if (selImp) {
+    selImp.innerHTML = '';
+    [1, 2, 3].forEach(n => {
+      const o = document.createElement('option');
+      o.value = n;
+      o.textContent = n === 1 ? '1 Impostor' : `${n} Impostores`;
+      selImp.appendChild(o);
+    });
+    selImp.value = '1';
+  }
+
   if (S.isHost) {
     document.getElementById('host-settings').style.display = 'block';
     document.getElementById('host-start-area').style.display = 'block';
@@ -119,10 +132,20 @@ async function leaveLobby() {
   screen('home');
 }
 
-function renderLobby(players) {
+function renderLobby(players, config) {
   const el = document.getElementById('lobby-players');
   const hostId = S.roomData?.config?.host;
   el.innerHTML = '';
+
+  // Sincroniza configurações salvas no Firebase com a UI do host
+  if (S.isHost && config) {
+    const selImp = document.getElementById('sel-impostor-count');
+    if (selImp && config.impostorCount) selImp.value = config.impostorCount;
+    const selCat = document.getElementById('sel-category');
+    if (selCat && config.wordCategory) selCat.value = config.wordCategory;
+    const chkSim = document.getElementById('chk-similar');
+    if (chkSim && config.similarWordMode !== undefined) chkSim.checked = config.similarWordMode;
+  }
   connectedPlayers(players).forEach(([id, p]) => {
     const d = document.createElement('div');
     d.className = 'player-item';

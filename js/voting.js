@@ -72,9 +72,10 @@ async function cancelVote() {
 async function processVotes(data) {
   if (!S.isHost) return;
 
-  const players = data.players || {};
-  const votes   = data.votes   || {};
-  const alive   = alivePlayers(players);
+  const players     = data.players || {};
+  const votes       = data.votes   || {};
+  const alive       = alivePlayers(players);
+  const impostorIds = data.impostorIds || [];
 
   // contagem
   const counts = {};
@@ -93,16 +94,19 @@ async function processVotes(data) {
 
   await roomRef.child(`players/${eliminated}/isAlive`).set(false);
 
-  const impostorId = data.impostorId;
+  // Jogadores restantes após eliminação
+  const remaining     = alive.filter(([id]) => id !== eliminated);
+  const aliveImps     = remaining.filter(([id]) => impostorIds.includes(id));
+  const aliveRegulars = remaining.filter(([id]) => !impostorIds.includes(id));
 
-  if (eliminated === impostorId) {
+  // Todos os impostores eliminados → jogadores vencem
+  if (aliveImps.length === 0) {
     await roomRef.update({ state: 'gameOver', winner: 'players', eliminatedThisRound: eliminated });
     return;
   }
 
-  // verifica se o impostor vence: impostor vivo E restantes <= 2 (impostor + 1)
-  const remaining = alive.filter(([id]) => id !== eliminated);
-  if (remaining.length <= 2) {
+  // Impostores >= jogadores regulares → impostores vencem
+  if (aliveImps.length >= aliveRegulars.length) {
     await roomRef.update({ state: 'gameOver', winner: 'impostor', eliminatedThisRound: eliminated });
     return;
   }

@@ -58,3 +58,32 @@ function alivePlayers(players) {
 function connectedPlayers(players) {
   return Object.entries(players || {}).filter(([, p]) => p.isConnected !== false);
 }
+
+// Verifica se playerId é impostor (suporta múltiplos impostores)
+function isImpostor(data, playerId) {
+  return (data.impostorIds || []).includes(playerId);
+}
+
+// Seleciona `count` impostores com peso: quem foi impostor na última partida
+// tem 1/3 da chance dos demais (peso 1 vs peso 3)
+function selectImpostors(players, count, lastImpostorIds) {
+  const eligible = connectedPlayers(players);
+  const pool = [];
+  eligible.forEach(([id]) => {
+    const w = (lastImpostorIds || []).includes(id) ? 1 : 3;
+    for (let i = 0; i < w; i++) pool.push(id);
+  });
+
+  const selected = [];
+  const remaining = [...pool];
+  for (let i = 0; i < Math.min(count, eligible.length); i++) {
+    if (!remaining.length) break;
+    const idx    = Math.floor(Math.random() * remaining.length);
+    const chosen = remaining[idx];
+    selected.push(chosen);
+    for (let j = remaining.length - 1; j >= 0; j--) {
+      if (remaining[j] === chosen) remaining.splice(j, 1);
+    }
+  }
+  return selected;
+}

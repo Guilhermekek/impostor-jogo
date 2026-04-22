@@ -785,6 +785,122 @@ input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
   font-weight: 600;
 }
 
+/* ── IMPOSTOR CHAT FAB ── */
+.imp-chat-fab {
+  position: fixed;
+  bottom: 84px;
+  right: 14px;
+  z-index: 90;
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 16px;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 18px rgba(239,68,68,.45);
+  transition: transform .18s, box-shadow .18s;
+}
+.imp-chat-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(239,68,68,.6); }
+
+.imp-chat-badge {
+  background: #fff;
+  color: var(--danger);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: .7rem;
+  font-weight: 900;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── IMPOSTOR CHAT MODAL ── */
+.imp-chat-box {
+  padding: 0 !important;
+  gap: 0 !important;
+  overflow: hidden;
+  max-height: 80vh;
+}
+
+.imp-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--danger);
+  color: #fff;
+  font-weight: 700;
+  font-size: .95rem;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.imp-messages-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 180px;
+  max-height: 46vh;
+  background: var(--surface);
+}
+
+.imp-empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: .88rem;
+  margin: auto;
+  line-height: 1.6;
+}
+
+.imp-msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 82%;
+  align-self: flex-start;
+}
+.imp-msg-mine { align-self: flex-end; }
+
+.imp-msg-name {
+  font-size: .7rem;
+  color: var(--danger);
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.imp-msg-mine .imp-msg-name { text-align: right; }
+
+.imp-msg-text {
+  background: var(--surface2);
+  border: 1px solid rgba(239,68,68,.25);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: .9rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+.imp-msg-mine .imp-msg-text {
+  background: rgba(239,68,68,.12);
+  border-color: rgba(239,68,68,.35);
+}
+
+.imp-chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.imp-chat-input input { flex: 1; }
+.imp-chat-input .btn { width: auto; padding: 10px 16px; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 400px) {
   .title { font-size: 2.5rem; }

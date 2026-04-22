@@ -30,7 +30,7 @@ function handleUpdate(data, changed) {
 
   switch (data.state) {
     case 'lobby':
-      renderLobby(data.players);
+      renderLobby(data.players, data.config);
       if (changed && cur !== 'screen-lobby') enterLobby();
       break;
 
@@ -101,6 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (roomRef && S.isHost) await roomRef.child('config/wordCategory').set(e.target.value);
   });
 
+  // Sincroniza número de impostores com Firebase
+  document.getElementById('sel-impostor-count').addEventListener('change', async e => {
+    if (roomRef && S.isHost) await roomRef.child('config/impostorCount').set(parseInt(e.target.value));
+  });
+
   // ── Role reveal ──
   document.getElementById('btn-ready').addEventListener('click', markReady);
 
@@ -128,6 +133,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('t-answer').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAnswer(); }
+  });
+
+  // ── Chat dos impostores ──
+  document.getElementById('btn-imp-chat').addEventListener('click', openImpostorChat);
+  document.getElementById('btn-close-imp-chat').addEventListener('click', closeImpostorChat);
+  document.getElementById('btn-send-imp').addEventListener('click', sendImpostorMsg);
+  document.getElementById('t-imp-msg').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendImpostorMsg(); }
   });
 
   // ── Chute do impostor ──

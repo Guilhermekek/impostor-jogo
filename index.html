@@ -45,6 +45,10 @@
         <label class="setting-label">Categoria das palavras</label>
         <select id="sel-category"></select>
       </div>
+      <div class="setting-row">
+        <label class="setting-label">Número de impostores</label>
+        <select id="sel-impostor-count"></select>
+      </div>
       <label class="toggle-row">
         <input type="checkbox" id="chk-similar">
         <span class="toggle-track"></span>
@@ -94,6 +98,27 @@
       <div style="display:flex;gap:10px">
         <button class="btn btn-primary" id="btn-confirm-guess">Confirmar chute</button>
         <button class="btn btn-secondary" id="btn-cancel-guess">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Impostor Chat FAB (visível só para impostores em modo multi-impostor) -->
+  <button id="btn-imp-chat" class="imp-chat-fab" style="display:none">
+    🕵️ Chat Secreto
+    <span id="imp-chat-badge" class="imp-chat-badge" style="display:none"></span>
+  </button>
+
+  <!-- Impostor Chat Modal -->
+  <div id="imp-chat-modal" class="modal-overlay" style="display:none">
+    <div class="modal-box imp-chat-box">
+      <div class="imp-chat-header">
+        <span>🕵️ Chat Secreto dos Impostores</span>
+        <button id="btn-close-imp-chat" class="btn-ghost" style="color:#fff;font-size:1.2rem">✕</button>
+      </div>
+      <div id="imp-messages" class="imp-messages-area"></div>
+      <div class="imp-chat-input">
+        <input type="text" id="t-imp-msg" placeholder="Mensagem secreta…" maxlength="200" autocomplete="off">
+        <button class="btn btn-danger" id="btn-send-imp">Enviar</button>
       </div>
     </div>
   </div>
@@ -245,6 +270,7 @@
 <script src="js/game.js"></script>
 <script src="js/voting.js"></script>
 <script src="js/results.js"></script>
+<script src="js/impostorchat.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/main.js"></script>
 </body>

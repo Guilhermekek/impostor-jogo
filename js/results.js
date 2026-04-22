@@ -3,10 +3,11 @@
 // ══════════════════════════════════════════════
 
 function showRoundResult(data) {
-  const players  = data.players || {};
-  const elimId   = data.eliminatedThisRound;
-  const elimName = players[elimId]?.name || '???';
-  const card     = document.getElementById('result-card');
+  const players     = data.players || {};
+  const elimId      = data.eliminatedThisRound;
+  const elimName    = players[elimId]?.name || '???';
+  const impostorIds = data.impostorIds || [];
+  const card        = document.getElementById('result-card');
 
   if (data.tiedVote || !elimId) {
     card.innerHTML = `
@@ -14,10 +15,11 @@ function showRoundResult(data) {
       <div class="big-title">Empate!</div>
       <div class="big-sub">Ninguém foi eliminado nessa rodada.</div>`;
   } else {
+    const wasImpostor = impostorIds.includes(elimId);
     card.innerHTML = `
       <div class="big-icon">⚡</div>
       <div class="big-title">${escHtml(elimName)} foi eliminado!</div>
-      <div class="big-sub">Mas não era o impostor…</div>`;
+      <div class="big-sub">${wasImpostor ? '🎉 Era um impostor!' : 'Mas não era impostor…'}</div>`;
   }
 
   document.getElementById('result-host-actions').style.display = S.isHost ? 'flex' : 'none';
@@ -28,31 +30,33 @@ function showRoundResult(data) {
 async function continueGame() {
   const nextTurnId = getNextTurnPlayerId(S.roomData);
   await roomRef.update({
-    state: 'playing',
-    round: (S.roomData?.round || 1) + 1,
-    turnPlayerId: nextTurnId,
-    pendingAnswer: null,
-    votingEnabled: false,
-    roundActed: null,
-    votes: null, voteInitiator: null,
-    eliminatedThisRound: null, tiedVote: null,
+    state:               'playing',
+    round:               (S.roomData?.round || 1) + 1,
+    turnPlayerId:        nextTurnId,
+    pendingAnswer:       null,
+    votingEnabled:       false,
+    roundActed:          null,
+    votes:               null,
+    voteInitiator:       null,
+    eliminatedThisRound: null,
+    tiedVote:            null,
   });
 }
 
 async function endGame() {
-  const impostorId    = S.roomData?.impostorId;
-  const players       = S.roomData?.players || {};
-  const impostorAlive = players[impostorId]?.isAlive;
-  await roomRef.update({ state: 'gameOver', winner: impostorAlive ? 'impostor' : 'players' });
+  const impostorIds      = S.roomData?.impostorIds || [];
+  const players          = S.roomData?.players || {};
+  const anyImpostorAlive = impostorIds.some(id => players[id]?.isAlive);
+  await roomRef.update({ state: 'gameOver', winner: anyImpostorAlive ? 'impostor' : 'players' });
 }
 
 function showGameOver(data) {
-  const pair       = getWordPair(data);
-  const impostorId = data.impostorId;
-  const players    = data.players || {};
-  const impName    = players[impostorId]?.name || '???';
+  const pair        = getWordPair(data);
+  const impostorIds = data.impostorIds || [];
+  const players     = data.players || {};
+  const impNames    = impostorIds.map(id => players[id]?.name || '???').join(', ');
   const similarMode = data.config?.similarWordMode;
-  const card = document.getElementById('gameover-card');
+  const card        = document.getElementById('gameover-card');
 
   const winPlayers = data.winner === 'players';
   const guessCtx = data.impostorKicked
@@ -61,22 +65,24 @@ function showGameOver(data) {
       ? (data.impostorGuessedCorrectly
           ? `O impostor chutou "<strong>${escHtml(data.impostorGuess)}</strong>" e acertou!`
           : `O impostor chutou "<strong>${escHtml(data.impostorGuess)}</strong>" e errou!`)
-      : (winPlayers ? 'O impostor foi descoberto!' : 'O impostor enganou todo mundo!');
+      : (winPlayers ? 'Os impostores foram descobertos!' : 'Os impostores enganaram todo mundo!');
+
+  const impLabel = impostorIds.length > 1 ? 'Os impostores eram:' : 'O impostor era:';
 
   card.innerHTML = `
     <div class="big-icon">${winPlayers ? '🏆' : '🕵️'}</div>
     <div class="big-title ${winPlayers ? 'win-p' : 'win-i'}">
-      ${winPlayers ? 'Jogadores vencem!' : 'Impostor vence!'}
+      ${winPlayers ? 'Jogadores vencem!' : 'Impostores vencem!'}
     </div>
     <div class="big-sub">${guessCtx}</div>
     <div style="margin-top:20px;width:100%">
-      <div class="info-line">O impostor era:</div>
-      <div class="info-val" style="margin-top:4px">${escHtml(impName)}</div>
+      <div class="info-line">${impLabel}</div>
+      <div class="info-val" style="margin-top:4px">${escHtml(impNames)}</div>
     </div>
     <div style="width:100%">
       <div class="info-line">A palavra era:</div>
       <span class="reveal-word">${escHtml(pair.word)}</span>
-      ${similarMode ? `<div class="info-line" style="margin-top:8px">Palavra do impostor: <strong>${escHtml(pair.similar)}</strong></div>` : ''}
+      ${similarMode ? `<div class="info-line" style="margin-top:8px">Palavra do(s) impostor(es): <strong>${escHtml(pair.similar)}</strong></div>` : ''}
     </div>`;
   screen('gameover');
 }
@@ -88,14 +94,17 @@ async function playAgain() {
   updates.state               = 'lobby';
   updates.round               = 0;
   updates.wordPairIndex       = null;
-  updates.impostorId          = null;
+  updates.lastImpostorIds     = S.roomData?.impostorIds || null;  // peso para próxima partida
+  updates.impostorIds         = null;
   updates.readyPlayers        = null;
   updates.messages            = null;
+  updates.impostorMessages    = null;
   updates.votes               = null;
   updates.eliminatedThisRound = null;
   updates.winner              = null;
   updates.tiedVote            = null;
   updates.voteInitiator       = null;
+  updates.impostorKicked      = null;
   await roomRef.update(updates);
   enterLobby();
 }
