@@ -820,42 +820,56 @@ input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
   justify-content: center;
 }
 
-/* ── IMPOSTOR CHAT MODAL ── */
-.imp-chat-box {
-  padding: 0 !important;
-  gap: 0 !important;
+/* ── IMPOSTOR CHAT PANEL (ancorado ao botão) ── */
+.imp-chat-panel {
+  position: fixed;
+  bottom: 136px;   /* acima do FAB */
+  right: 14px;
+  width: 300px;
+  max-height: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,.45);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  max-height: 80vh;
+  z-index: 300;
+  transform-origin: bottom right;
+  animation: impChatIn .2s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes impChatIn {
+  from { opacity: 0; transform: scale(.75) translateY(16px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
 }
 
 .imp-chat-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  padding: 12px 14px;
   background: var(--danger);
   color: #fff;
   font-weight: 700;
-  font-size: .95rem;
-  border-radius: var(--radius) var(--radius) 0 0;
+  font-size: .88rem;
+  flex-shrink: 0;
 }
 
 .imp-messages-area {
   flex: 1;
   overflow-y: auto;
-  padding: 14px 16px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-height: 180px;
-  max-height: 46vh;
+  gap: 9px;
   background: var(--surface);
 }
 
 .imp-empty {
   text-align: center;
   color: var(--muted);
-  font-size: .88rem;
+  font-size: .85rem;
   margin: auto;
   line-height: 1.6;
 }
@@ -863,13 +877,13 @@ input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
 .imp-msg {
   display: flex;
   flex-direction: column;
-  max-width: 82%;
+  max-width: 84%;
   align-self: flex-start;
 }
 .imp-msg-mine { align-self: flex-end; }
 
 .imp-msg-name {
-  font-size: .7rem;
+  font-size: .68rem;
   color: var(--danger);
   font-weight: 700;
   margin-bottom: 3px;
@@ -878,10 +892,10 @@ input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
 
 .imp-msg-text {
   background: var(--surface2);
-  border: 1px solid rgba(239,68,68,.25);
+  border: 1px solid rgba(239,68,68,.22);
   border-radius: 12px;
-  padding: 8px 12px;
-  font-size: .9rem;
+  padding: 7px 11px;
+  font-size: .88rem;
   line-height: 1.4;
   word-break: break-word;
 }
@@ -892,14 +906,14 @@ input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
 
 .imp-chat-input {
   display: flex;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 6px;
+  padding: 10px 12px;
   background: var(--surface);
   border-top: 1px solid var(--border);
-  border-radius: 0 0 var(--radius) var(--radius);
+  flex-shrink: 0;
 }
-.imp-chat-input input { flex: 1; }
-.imp-chat-input .btn { width: auto; padding: 10px 16px; }
+.imp-chat-input input { flex: 1; font-size: .88rem; padding: 8px 12px; }
+.imp-chat-input .btn  { width: auto; padding: 8px 14px; font-size: 1rem; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 400px) {

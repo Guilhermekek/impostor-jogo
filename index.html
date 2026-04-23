@@ -108,18 +108,16 @@
     <span id="imp-chat-badge" class="imp-chat-badge" style="display:none"></span>
   </button>
 
-  <!-- Impostor Chat Modal -->
-  <div id="imp-chat-modal" class="modal-overlay" style="display:none">
-    <div class="modal-box imp-chat-box">
-      <div class="imp-chat-header">
-        <span>🕵️ Chat Secreto dos Impostores</span>
-        <button id="btn-close-imp-chat" class="btn-ghost" style="color:#fff;font-size:1.2rem">✕</button>
-      </div>
-      <div id="imp-messages" class="imp-messages-area"></div>
-      <div class="imp-chat-input">
-        <input type="text" id="t-imp-msg" placeholder="Mensagem secreta…" maxlength="200" autocomplete="off">
-        <button class="btn btn-danger" id="btn-send-imp">Enviar</button>
-      </div>
+  <!-- Impostor Chat Panel (ancorado ao botão, não é modal central) -->
+  <div id="imp-chat-modal" class="imp-chat-panel" style="display:none">
+    <div class="imp-chat-header">
+      <span>🕵️ Chat Secreto</span>
+      <button id="btn-close-imp-chat" class="btn-ghost" style="color:#fff;font-size:1.2rem;line-height:1">✕</button>
+    </div>
+    <div id="imp-messages" class="imp-messages-area"></div>
+    <div class="imp-chat-input">
+      <input type="text" id="t-imp-msg" placeholder="Mensagem secreta…" maxlength="200" autocomplete="off">
+      <button class="btn btn-danger" id="btn-send-imp">↑</button>
     </div>
   </div>
 

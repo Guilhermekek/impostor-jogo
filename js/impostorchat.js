@@ -10,7 +10,12 @@ function openImpostorChat() {
   _impChatOpen = true;
   _impUnread   = 0;
   updateImpostorBadge();
-  document.getElementById('imp-chat-modal').style.display = 'flex';
+  const panel = document.getElementById('imp-chat-modal');
+  panel.style.display = 'flex';
+  // Reinicia animação ao reabrir
+  panel.style.animation = 'none';
+  panel.offsetHeight; // força reflow
+  panel.style.animation = '';
   renderImpostorMessages(S.roomData?.impostorMessages);
   setTimeout(() => document.getElementById('t-imp-msg')?.focus(), 50);
 }
