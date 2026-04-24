@@ -120,7 +120,16 @@ function checkAllReady(data) {
   const connected = connectedPlayers(data.players || {});
   const ready     = data.readyPlayers || {};
   if (connected.length > 0 && connected.every(([id]) => ready[id])) {
-    roomRef.update({ state: 'playing' });
+    const round  = data.round || 1;
+    const sysKey = roomRef.child('messages').push().key;
+    roomRef.update({
+      state: 'playing',
+      [`messages/${sysKey}`]: {
+        type: 'system',
+        text: `Rodada ${round} · Começou`,
+        ts: Date.now(),
+      },
+    });
   }
 }
 

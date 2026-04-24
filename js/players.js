@@ -10,6 +10,12 @@ function renderStrip(players, turnPlayerId) {
     .filter(([, p]) => !(p.isConnected === false && p.kicked))
     .sort((a, b) => a[1].joinedAt - b[1].joinedAt);
 
+  // Desktop-only header: "SUSPEITOS · N"
+  const header = document.createElement('div');
+  header.className = 'players-sidebar-header';
+  header.textContent = `Suspeitos · ${ordered.length}`;
+  el.appendChild(header);
+
   ordered.forEach(([id, p]) => {
     const chip     = document.createElement('div');
     const isMe     = id === S.playerId;
@@ -37,6 +43,20 @@ function renderStrip(players, turnPlayerId) {
       kickPlayer(btn.dataset.id);
     });
   });
+
+  // Desktop-only footer: "ORDEM DE TURNO"
+  const aliveOrdered = ordered.filter(([, p]) => p.isAlive);
+  const footer = document.createElement('div');
+  footer.className = 'turn-order-footer';
+  footer.innerHTML = `
+    <div class="turn-order-label">Ordem de turno</div>
+    <div class="turn-order-circles">
+      ${aliveOrdered.map(([id, p]) => `
+        <div class="turn-order-circle${id === turnPlayerId ? ' active' : ''}">${initial(p.name)}</div>
+      `).join('')}
+    </div>
+  `;
+  el.appendChild(footer);
 }
 
 function updateTargets(players) {

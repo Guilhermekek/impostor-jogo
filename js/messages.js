@@ -18,14 +18,15 @@ function renderMessages(messages) {
     } else {
       const isQ = m.type === 'question';
       const isA = m.type === 'answer';
-      d.className = 'msg';
+      d.className = 'msg' + (isQ ? ' q' : isA ? ' a' : '');
       const badgeClass = isQ ? ' q' : isA ? ' a' : '';
-      const badgeText  = isQ ? '❓ Pergunta' : isA ? '💬 Resposta' : '💬 Declaração';
+      const badgeText  = isQ ? 'PERGUNTA' : isA ? 'RESPOSTA' : 'DECLARAÇÃO';
       d.innerHTML = `
         <div class="msg-header">
-          <span class="msg-author">${escHtml(m.playerName)}</span>
           <span class="msg-badge${badgeClass}">${badgeText}</span>
+          <span class="msg-author">${escHtml(m.playerName)}</span>
           ${isQ ? `<span class="msg-target">→ ${escHtml(m.targetName || '')}</span>` : ''}
+          ${isA && m.targetName ? `<span class="msg-target">(para ${escHtml(m.targetName)})</span>` : ''}
         </div>
         <div class="msg-text">${escHtml(m.text)}</div>`;
     }
@@ -102,13 +103,16 @@ async function sendAnswer() {
   const text = document.getElementById('t-answer').value.trim();
   if (!text) { toast('Escreva sua resposta!'); return; }
 
-  const msgKey = roomRef.child('messages').push().key;
+  const msgKey   = roomRef.child('messages').push().key;
+  const askerName = S.roomData?.pendingAnswer?.askerName || null;
 
   // Resposta NÃO conta como turno do respondedor — apenas avança o turno
   const answerUpdates = {
     [`messages/${msgKey}`]: {
       playerId: S.playerId, playerName: S.playerName,
-      type: 'answer', text, ts: Date.now(),
+      type: 'answer', text,
+      targetName: askerName,
+      ts: Date.now(),
     },
     turnPlayerId: getNextTurnPlayerId(S.roomData),
     pendingAnswer: null,

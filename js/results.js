@@ -58,9 +58,11 @@ function showRoundResult(data) {
 async function continueGame() {
   // Revanche — keeps the same wordPairIndex
   const nextTurnId = getNextTurnPlayerId(S.roomData);
+  const nextRound  = (S.roomData?.round || 1) + 1;
+  const sysKey     = roomRef.child('messages').push().key;
   await roomRef.update({
     state:               'playing',
-    round:               (S.roomData?.round || 1) + 1,
+    round:               nextRound,
     turnPlayerId:        nextTurnId,
     pendingAnswer:       null,
     votingEnabled:       false,
@@ -69,6 +71,11 @@ async function continueGame() {
     voteInitiator:       null,
     eliminatedThisRound: null,
     tiedVote:            null,
+    [`messages/${sysKey}`]: {
+      type: 'system',
+      text: `Rodada ${nextRound} · Começou`,
+      ts: Date.now(),
+    },
   });
 }
 
@@ -83,9 +90,11 @@ async function continueNewWord() {
     }
   }
   const nextTurnId = getNextTurnPlayerId(S.roomData);
+  const nextRound  = (S.roomData?.round || 1) + 1;
+  const sysKey     = roomRef.child('messages').push().key;
   await roomRef.update({
     state:               'playing',
-    round:               (S.roomData?.round || 1) + 1,
+    round:               nextRound,
     wordPairIndex:       newIndex,
     wordCategory:        cat,
     turnPlayerId:        nextTurnId,
@@ -96,6 +105,11 @@ async function continueNewWord() {
     voteInitiator:       null,
     eliminatedThisRound: null,
     tiedVote:            null,
+    [`messages/${sysKey}`]: {
+      type: 'system',
+      text: `Rodada ${nextRound} · Começou`,
+      ts: Date.now(),
+    },
   });
 }
 

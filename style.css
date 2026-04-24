@@ -408,8 +408,9 @@ input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
     padding: 0 !important;
     background: var(--bg-elev) !important;
     gap: 0 !important;
-    height: auto;
+    height: 100%;
     align-items: stretch !important;
+    justify-content: flex-start;
   }
 
   /* Chips become horizontal rows in the sidebar */
@@ -630,7 +631,9 @@ input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
 .msg-target { font-size: .78rem; color: var(--muted); }
 .msg-text { color: var(--text); line-height: 1.45; word-break: break-word; }
 .msg-sys {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: 0.65rem;
@@ -639,7 +642,15 @@ input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
   font-style: normal;
   background: transparent;
   border: none;
-  padding: 2px;
+  padding: 4px 0;
+  margin: 4px 0;
+}
+.msg-sys::before,
+.msg-sys::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 /* ── ACTION AREA ── */
@@ -830,8 +841,54 @@ input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
   font-style: italic;
 }
 
-/* Mobile: p-info hidden (only av + span shown) */
-.p-info { display: none; }
+/* Mobile: p-info, sidebar header, turn-order all hidden */
+.p-info               { display: none; }
+.players-sidebar-header { display: none; }
+.turn-order-footer    { display: none; }
+
+/* Desktop sidebar header */
+@media (min-width: 900px) {
+  .players-sidebar-header {
+    display: block;
+    padding: 16px 18px 10px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .turn-order-footer {
+    display: block;
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+  }
+  .turn-order-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .turn-order-circles { display: flex; gap: 5px; flex-wrap: wrap; }
+  .turn-order-circle {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--surface2);
+    color: var(--text-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    border: 1px solid var(--border);
+  }
+  .turn-order-circle.active {
+    background: var(--primary);
+    color: oklch(0.18 0.02 60);
+    border-color: var(--primary);
+  }
+}
 
 /* ── HOST AREA RESULT ── */
 .host-actions { display: flex; flex-direction: column; gap: 10px; }
