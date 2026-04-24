@@ -65,11 +65,14 @@ function showRoleReveal(data) {
   S.myWord = myIsImp ? (similarMode ? pair.similar : null) : pair.word;
 
   const icon  = document.getElementById('role-icon');
+  const stamp = document.getElementById('role-stamp');
   const title = document.getElementById('role-title');
   const desc  = document.getElementById('role-desc');
   const wdisp = document.getElementById('word-display');
 
   if (myIsImp) {
+    stamp.textContent = '◈ Alvo ◈';
+    stamp.className   = 'role-stamp impostor';
     icon.textContent  = '🕵️';
     title.textContent = multiImp ? 'Vocês são os IMPOSTORES!' : 'Você é o IMPOSTOR!';
 
@@ -89,6 +92,8 @@ function showRoleReveal(data) {
     wdisp.style.borderColor = similarMode ? 'var(--warning)' : 'var(--danger)';
     wdisp.style.color       = similarMode ? 'var(--warning)' : 'var(--danger)';
   } else {
+    stamp.textContent = '◆ Detetive ◆';
+    stamp.className   = 'role-stamp';
     icon.textContent  = '👥';
     title.textContent = 'Você é um Jogador!';
     desc.textContent  = multiImp

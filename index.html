@@ -6,6 +6,9 @@
   <title>O Impostor</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕵️</text></svg>">
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -13,15 +16,15 @@
 <div id="screen-home" class="screen active">
   <div class="container">
     <div>
-      <h1 class="title">🕵️ O Impostor</h1>
-      <p class="subtitle">Um está entre vocês…</p>
+      <h1 class="title">O Impostor</h1>
+      <p class="subtitle">"Um está entre vocês. Descubra quem."</p>
     </div>
     <div class="card">
-      <input type="text" id="inp-name" placeholder="Seu nome" maxlength="20" autocomplete="off">
-      <button class="btn btn-primary" id="btn-create">Criar Sala</button>
+      <input type="text" id="inp-name" placeholder="Seu nome de detetive" maxlength="20" autocomplete="off">
+      <button class="btn btn-primary" id="btn-create">Abrir nova investigação</button>
       <div class="divider">ou entre em uma sala</div>
-      <input type="text" id="inp-code" placeholder="Código da sala (ex: AB3C)" maxlength="4" style="text-transform:uppercase;letter-spacing:.15em;font-weight:700;text-align:center">
-      <button class="btn btn-secondary" id="btn-join">Entrar na Sala</button>
+      <input type="text" id="inp-code" placeholder="A B 3 C" maxlength="4" style="font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.35em;font-weight:700;text-align:center;font-size:1.2rem;">
+      <button class="btn btn-secondary" id="btn-join">Entrar na investigação</button>
     </div>
   </div>
 </div>
@@ -30,17 +33,17 @@
 <div id="screen-lobby" class="screen">
   <div class="container">
     <button class="btn-back" id="btn-leave-lobby">← Voltar</button>
-    <h2>Sala</h2>
+    <h2><span class="mono">SALA DE ESPERA</span></h2>
     <div class="room-code-display">
       <span id="show-code"></span>
       <button class="btn-ghost" id="btn-copy" title="Copiar código">📋</button>
     </div>
-    <p class="hint">Compartilhe o código com seus amigos</p>
+    <p class="hint">Compartilhe com os suspeitos</p>
 
     <div id="lobby-players" class="players-list"></div>
 
     <div id="host-settings" class="settings-panel" style="display:none">
-      <h3>Configurações</h3>
+      <h3>◆ Parâmetros da Investigação</h3>
       <div class="setting-row">
         <label class="setting-label">Categoria das palavras</label>
         <select id="sel-category"></select>
@@ -57,7 +60,7 @@
     </div>
 
     <div id="host-start-area" style="display:none">
-      <button class="btn btn-primary" id="btn-start">Iniciar Jogo</button>
+      <button class="btn btn-primary" id="btn-start">Iniciar Investigação</button>
     </div>
     <p id="lobby-waiting" class="waiting-label" style="display:none">Aguardando o host iniciar…</p>
   </div>
@@ -67,6 +70,7 @@
 <div id="screen-role" class="screen">
   <div class="container">
     <div class="role-card">
+      <div id="role-stamp" class="role-stamp"></div>
       <div id="role-icon" class="role-icon"></div>
       <h2 id="role-title"></h2>
       <p id="role-desc"></p>
@@ -164,7 +168,7 @@
 <!-- ══════════════ VOTING ══════════════ -->
 <div id="screen-voting" class="screen">
   <div class="container">
-    <h2>🗳️ Votação</h2>
+    <h2>◆ Julgamento ◆</h2>
     <p class="hint">Quem é o impostor?</p>
     <div id="vote-grid" class="vote-grid"></div>
     <p id="vote-status" class="vote-status"></p>

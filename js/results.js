@@ -8,6 +8,7 @@ function showRoundResult(data) {
   const elimName    = players[elimId]?.name || '???';
   const impostorIds = data.impostorIds || [];
   const card        = document.getElementById('result-card');
+  const hostActions = document.getElementById('result-host-actions');
 
   if (data.tiedVote || !elimId) {
     card.innerHTML = `
@@ -22,16 +23,71 @@ function showRoundResult(data) {
       <div class="big-sub">${wasImpostor ? '🎉 Era um impostor!' : 'Mas não era impostor…'}</div>`;
   }
 
-  document.getElementById('result-host-actions').style.display = S.isHost ? 'flex' : 'none';
-  document.getElementById('result-waiting').style.display       = S.isHost ? 'none' : 'block';
+  // Build host actions dynamically — what makes sense depends on the outcome
+  if (S.isHost) {
+    const detectivesWon = elimId && impostorIds.includes(elimId);
+
+    if (detectivesWon) {
+      // Detetives pegaram um impostor — nova palavra faz sentido
+      hostActions.innerHTML = `
+        <button class="btn btn-primary"   id="btn-continue">Próxima rodada · nova palavra</button>
+        <button class="btn btn-secondary" id="btn-end">Encerrar jogo</button>`;
+      document.getElementById('btn-continue').addEventListener('click', continueNewWord);
+    } else {
+      // Impostor sobreviveu — oferecer revanche com a mesma palavra
+      hostActions.innerHTML = `
+        <button class="btn btn-primary"   id="btn-continue-same">Revanche · mesma palavra</button>
+        <button class="btn btn-secondary" id="btn-continue-new">Próxima rodada · nova palavra</button>
+        <button class="btn btn-secondary" id="btn-end">Encerrar jogo</button>
+        <p class="hint" style="font-style:italic;margin-top:4px;">
+          O impostor sobreviveu — a revanche dá aos detetives outra chance com as dicas que já têm.</p>`;
+      document.getElementById('btn-continue-same').addEventListener('click', continueGame);
+      document.getElementById('btn-continue-new').addEventListener('click', continueNewWord);
+    }
+
+    document.getElementById('btn-end').addEventListener('click', endGame);
+    hostActions.style.display = 'flex';
+  } else {
+    hostActions.style.display = 'none';
+  }
+
+  document.getElementById('result-waiting').style.display = S.isHost ? 'none' : 'block';
   screen('result');
 }
 
 async function continueGame() {
+  // Revanche — keeps the same wordPairIndex
   const nextTurnId = getNextTurnPlayerId(S.roomData);
   await roomRef.update({
     state:               'playing',
     round:               (S.roomData?.round || 1) + 1,
+    turnPlayerId:        nextTurnId,
+    pendingAnswer:       null,
+    votingEnabled:       false,
+    roundActed:          null,
+    votes:               null,
+    voteInitiator:       null,
+    eliminatedThisRound: null,
+    tiedVote:            null,
+  });
+}
+
+async function continueNewWord() {
+  // Avança para nova rodada com palavra diferente da categoria atual
+  const cat    = S.roomData?.config?.wordCategory || S.roomData?.wordCategory || 'Tudo';
+  const pairs  = CATEGORIES[cat];
+  let newIndex = Math.floor(Math.random() * pairs.length);
+  if (pairs.length > 1) {
+    while (newIndex === S.roomData?.wordPairIndex) {
+      newIndex = Math.floor(Math.random() * pairs.length);
+    }
+  }
+  const nextTurnId = getNextTurnPlayerId(S.roomData);
+  await roomRef.update({
+    state:               'playing',
+    round:               (S.roomData?.round || 1) + 1,
+    wordPairIndex:       newIndex,
+    wordCategory:        cat,
     turnPlayerId:        nextTurnId,
     pendingAnswer:       null,
     votingEnabled:       false,
