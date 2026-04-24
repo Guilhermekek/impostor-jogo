@@ -18,9 +18,14 @@ function renderStrip(players, turnPlayerId) {
       + (p.isAlive ? '' : ' dead')
       + (isActive  ? ' active' : '');
 
+    const subLabel = isActive ? '▸ na vez' : !p.isAlive ? 'eliminado' : '';
     chip.innerHTML = `
       <div class="av">${initial(p.name)}</div>
-      <span>${escHtml(p.name)}${isMe ? ' (você)' : ''}</span>
+      <span>${escHtml(p.name)}${isMe ? ' <small style="opacity:.6;font-size:.85em">(você)</small>' : ''}</span>
+      <div class="p-info">
+        <div class="p-name">${escHtml(p.name)}${isMe ? ' <small style="opacity:.6;font-size:.75em">você</small>' : ''}</div>
+        <div class="p-sub">${subLabel}</div>
+      </div>
       ${S.isHost && !isMe && p.isAlive ? `<button class="kick-btn" data-id="${id}" title="Remover jogador">×</button>` : ''}
     `;
     el.appendChild(chip);

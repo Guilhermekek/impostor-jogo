@@ -125,43 +125,54 @@
     </div>
   </div>
 
-  <!-- Players strip -->
-  <div class="players-strip" id="g-players"></div>
+  <!-- Game body: 3-col on desktop, single col on mobile -->
+  <div id="game-body">
 
-  <!-- Turn bar -->
-  <div class="turn-bar" id="turn-bar"></div>
+    <!-- LEFT: Players (horizontal strip on mobile, vertical sidebar on desktop) -->
+    <div class="players-strip" id="g-players"></div>
 
-  <!-- Messages -->
-  <div class="messages-area" id="g-messages"></div>
+    <!-- CENTER: Turn bar + messages + action -->
+    <div id="game-center">
+      <!-- Turn bar -->
+      <div class="turn-bar" id="turn-bar"></div>
 
-  <!-- Action area -->
-  <div class="action-area">
-    <!-- My turn: statement or question -->
-    <div id="my-turn-area" style="display:none">
-      <div class="tabs" id="action-tabs">
-        <button class="tab on" data-t="statement">💬 Declaração</button>
-        <button class="tab" data-t="question">❓ Pergunta</button>
-      </div>
-      <div id="f-statement" class="form">
-        <textarea id="t-statement" placeholder="Escreva algo relacionado à palavra…" maxlength="240"></textarea>
-        <button class="btn btn-primary" id="btn-send-s">Enviar</button>
-      </div>
-      <div id="f-question" class="form" style="display:none">
-        <select id="sel-target"></select>
-        <textarea id="t-question" placeholder="Sua pergunta para esse jogador…" maxlength="240"></textarea>
-        <button class="btn btn-primary" id="btn-send-q">Perguntar</button>
+      <!-- Messages -->
+      <div class="messages-area" id="g-messages"></div>
+
+      <!-- Action area -->
+      <div class="action-area">
+        <!-- My turn: statement or question -->
+        <div id="my-turn-area" style="display:none">
+          <div class="tabs" id="action-tabs">
+            <button class="tab on" data-t="statement">💬 Declaração</button>
+            <button class="tab" data-t="question">❓ Pergunta</button>
+          </div>
+          <div id="f-statement" class="form">
+            <textarea id="t-statement" placeholder="Escreva algo relacionado à palavra…" maxlength="240"></textarea>
+            <button class="btn btn-primary" id="btn-send-s">Enviar</button>
+          </div>
+          <div id="f-question" class="form" style="display:none">
+            <select id="sel-target"></select>
+            <textarea id="t-question" placeholder="Sua pergunta para esse jogador…" maxlength="240"></textarea>
+            <button class="btn btn-primary" id="btn-send-q">Perguntar</button>
+          </div>
+        </div>
+
+        <!-- Answer pending question -->
+        <div id="f-answer" class="form" style="display:none">
+          <div class="answer-prompt" id="answer-prompt"></div>
+          <textarea id="t-answer" placeholder="Sua resposta…" maxlength="240"></textarea>
+          <button class="btn btn-primary" id="btn-send-a">Responder</button>
+        </div>
+
+        <!-- Waiting for others -->
+        <div id="waiting-turn" class="waiting-turn" style="display:none"></div>
       </div>
     </div>
 
-    <!-- Answer pending question -->
-    <div id="f-answer" class="form" style="display:none">
-      <div class="answer-prompt" id="answer-prompt"></div>
-      <textarea id="t-answer" placeholder="Sua resposta…" maxlength="240"></textarea>
-      <button class="btn btn-primary" id="btn-send-a">Responder</button>
-    </div>
+    <!-- RIGHT: Sidebar — role card + meta (desktop only) -->
+    <div id="game-sidebar"></div>
 
-    <!-- Waiting for others -->
-    <div id="waiting-turn" class="waiting-turn" style="display:none"></div>
   </div>
 </div>
 

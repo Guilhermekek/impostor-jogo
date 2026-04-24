@@ -144,6 +144,7 @@ function showGame(data) {
   renderMessages(data.messages);
   updateImpostorChatVisibility(data);
   renderTurnState(data);
+  updateSidebar(data);
   screen('game');
 }
 
@@ -154,6 +155,63 @@ function updateGame(data) {
   renderMessages(data.messages);
   updateImpostorChatVisibility(data);
   renderTurnState(data);
+  updateSidebar(data);
+}
+
+// ── Sidebar (painel lateral desktop) ──
+function updateSidebar(data) {
+  const sidebar = document.getElementById('game-sidebar');
+  if (!sidebar) return;
+
+  const pair       = getWordPair(data);
+  const myIsImp    = isImpostor(data, S.playerId);
+  const simMode    = data.config?.similarWordMode;
+  const impostorIds = data.impostorIds || [];
+  const players    = data.players || {};
+  const cat        = data.config?.wordCategory || data.wordCategory || 'Tudo';
+  const impCount   = impostorIds.length;
+
+  const allAlive   = alivePlayers(players);
+  const aliveCount = allAlive.length;
+  const totalConn  = connectedPlayers(players).length;
+  const deadCount  = totalConn - aliveCount;
+
+  const word       = myIsImp ? (simMode ? pair.similar : '???') : pair.word;
+  const wordColor  = myIsImp ? (simMode ? 'var(--warning)' : 'var(--danger)') : 'var(--primary)';
+  const roleTitle  = myIsImp ? 'Impostor' : 'Detetive';
+  const roleDesc   = myIsImp
+    ? (simMode ? 'Você recebeu uma palavra similar. Se misture com os detetives!'
+               : 'Você não tem a palavra real. Observe as dicas e se misture!')
+    : 'Você conhece a palavra. Dê pistas sutis para desmascarar o impostor sem entregá-la.';
+  const tip = myIsImp
+    ? '"Ouça com atenção. Os detetives darão pistas que revelam a palavra — use-as a seu favor."'
+    : '"Repare em quem fala genericamente demais. O impostor pesca — o detetive sabe."';
+  const roleCardClass = myIsImp ? 'sidebar-role-card imp' : 'sidebar-role-card';
+
+  sidebar.innerHTML = `
+    <div class="${roleCardClass}">
+      <div class="sidebar-label">◆ Seu papel</div>
+      <div class="sidebar-role-title">${roleTitle}</div>
+      <div class="sidebar-role-desc">${escHtml(roleDesc)}</div>
+      <div class="sidebar-word-box" style="border-color:${wordColor}">
+        <div class="sidebar-word-label">PALAVRA SECRETA</div>
+        <div class="sidebar-word" style="color:${wordColor}">${escHtml(word)}</div>
+      </div>
+    </div>
+    <div class="sidebar-meta">
+      <div class="sidebar-label">Meta</div>
+      <div class="sidebar-meta-rows">
+        <div class="sidebar-meta-row"><span>Categoria</span><span>${escHtml(cat)}</span></div>
+        <div class="sidebar-meta-row"><span>Impostores</span><span>${impCount}</span></div>
+        <div class="sidebar-meta-row"><span>Jogadores</span><span>${aliveCount}${deadCount > 0 ? ` · ${deadCount} elim.` : ''}</span></div>
+        <div class="sidebar-meta-row"><span>Palavra similar</span><span>${simMode ? 'Sim' : 'Não'}</span></div>
+      </div>
+    </div>
+    <div class="sidebar-tips">
+      <div class="sidebar-label">🕵️ Dica do caso</div>
+      <div class="sidebar-tips-text">${escHtml(tip)}</div>
+    </div>
+  `;
 }
 
 // ── Chute do impostor ──
