@@ -75,20 +75,27 @@ async function sendMsg(type) {
     updates['turnPlayerId'] = getNextTurnPlayerId(S.roomData);
     updates['pendingAnswer'] = null;
     updates['roundActed'] = newActed;
+
     if (allActed) {
+      // Rodada completa: avança contador, habilita votação
       const nextRound = (S.roomData?.round || 1) + 1;
-      updates['votingEnabled'] = true;
-      updates['roundActed']    = null;
-      updates['round']         = nextRound;
+      updates['votingEnabled']          = true;
+      updates['roundActed']             = null;
+      updates['round']                  = nextRound;
+      updates['roundCompleteOnAnswer']  = null;
       const sysKey2 = roomRef.child('messages').push().key;
       updates[`messages/${sysKey2}`] = {
         type: 'system',
         text: `Rodada ${nextRound} · Começou — Votação disponível`,
         ts: Date.now() + 1,
       };
+    } else if (S.roomData?.votingEnabled) {
+      // Alguém falou no início de nova rodada: desabilita votação
+      updates['votingEnabled'] = false;
     }
+
   } else {
-    // Pergunta conta o turno do perguntador, mas aguarda a resposta
+    // Pergunta conta o turno do perguntador, mas precisa aguardar a resposta
     const { newActed, allActed: qAllActed } = actorUpdate(S.playerId, S.roomData);
     updates['roundActed'] = newActed;
     updates['pendingAnswer'] = {
@@ -96,17 +103,15 @@ async function sendMsg(type) {
       askerName: S.playerName,
       questionText: text,
     };
+
     if (qAllActed) {
-      const nextRound = (S.roomData?.round || 1) + 1;
-      updates['votingEnabled'] = true;
-      updates['roundActed']    = null;
-      updates['round']         = nextRound;
-      const sysKey2 = roomRef.child('messages').push().key;
-      updates[`messages/${sysKey2}`] = {
-        type: 'system',
-        text: `Rodada ${nextRound} · Começou — Votação disponível`,
-        ts: Date.now() + 1,
-      };
+      // Todos agiram, mas ainda há resposta pendente:
+      // marca para completar a rodada quando a resposta chegar
+      updates['roundCompleteOnAnswer'] = true;
+      updates['votingEnabled']         = false; // mantém travado até a resposta
+    } else if (S.roomData?.votingEnabled) {
+      // Alguém perguntou no início de nova rodada: desabilita votação
+      updates['votingEnabled'] = false;
     }
   }
 
@@ -117,7 +122,7 @@ async function sendAnswer() {
   const text = document.getElementById('t-answer').value.trim();
   if (!text) { toast('Escreva sua resposta!'); return; }
 
-  const msgKey   = roomRef.child('messages').push().key;
+  const msgKey    = roomRef.child('messages').push().key;
   const askerName = S.roomData?.pendingAnswer?.askerName || null;
 
   // Resposta NÃO conta como turno do respondedor — apenas avança o turno
@@ -128,10 +133,25 @@ async function sendAnswer() {
       targetName: askerName,
       ts: Date.now(),
     },
-    turnPlayerId: getNextTurnPlayerId(S.roomData),
-    pendingAnswer: null,
+    turnPlayerId:           getNextTurnPlayerId(S.roomData),
+    pendingAnswer:          null,
+    roundCompleteOnAnswer:  null,
   };
-  await roomRef.update(answerUpdates);
 
+  // Se a pergunta era o último ato da rodada, completa a rodada agora
+  if (S.roomData?.roundCompleteOnAnswer) {
+    const nextRound = (S.roomData?.round || 1) + 1;
+    answerUpdates['votingEnabled'] = true;
+    answerUpdates['roundActed']    = null;
+    answerUpdates['round']         = nextRound;
+    const sysKey2 = roomRef.child('messages').push().key;
+    answerUpdates[`messages/${sysKey2}`] = {
+      type: 'system',
+      text: `Rodada ${nextRound} · Começou — Votação disponível`,
+      ts: Date.now() + 1,
+    };
+  }
+
+  await roomRef.update(answerUpdates);
   document.getElementById('t-answer').value = '';
 }
