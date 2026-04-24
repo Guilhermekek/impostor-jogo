@@ -68,15 +68,13 @@ function handleUpdate(data, changed) {
 // ── DOM Event Listeners ────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initFirebase();
+  initAuth();
 
   // ── Home ──
   document.getElementById('btn-create').addEventListener('click', createRoom);
   document.getElementById('btn-join').addEventListener('click', joinRoom);
 
-  document.getElementById('btn-login').addEventListener('click', () =>
-    toast('Login com conta — em breve! 🔐'));
-  document.getElementById('btn-register').addEventListener('click', () =>
-    toast('Cadastro — em breve! 🔐'));
+  // btn-login e btn-register são gerenciados dinamicamente por auth.js
 
   document.getElementById('btn-how-to-play').addEventListener('click', () => {
     document.getElementById('how-to-play-modal').style.display = 'flex';

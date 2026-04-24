@@ -272,6 +272,88 @@ body::after {
   }
 }
 
+/* ── Auth modals ── */
+.auth-modal-box {
+  max-width: 380px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.auth-modal-icon {
+  font-size: 1.6rem;
+  text-align: center;
+}
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 11px 20px;
+  font-size: .88rem;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color .18s, background .18s;
+}
+.btn-google:hover { border-color: var(--border-hi); background: var(--surface); }
+.auth-error {
+  color: var(--danger);
+  font-size: .8rem;
+  text-align: center;
+  min-height: 16px;
+  margin: -4px 0;
+}
+.auth-switch {
+  text-align: center;
+  font-size: .82rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.auth-link {
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.auth-link:hover { color: var(--primary-light); }
+
+/* Logged-in chip in home auth row */
+.home-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  width: 100%;
+}
+.home-user-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: oklch(0.15 0.02 60);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+  flex-shrink: 0;
+}
+.home-user-name {
+  flex: 1;
+  font-size: .9rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── How-to-play modal ── */
 .how-to-play-rules {
   display: flex;
