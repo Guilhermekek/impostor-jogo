@@ -78,6 +78,232 @@ body::after {
   justify-content: center;
 }
 
+/* ══════════════════════════════════════════════
+   HOME REDESIGN
+   ══════════════════════════════════════════════ */
+#screen-home {
+  position: relative;
+  overflow: hidden;
+}
+#screen-home.active {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Corner decorations */
+.home-corner-tl,
+.home-corner-tr {
+  position: absolute;
+  top: 18px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  text-transform: uppercase;
+  z-index: 2;
+  pointer-events: none;
+}
+.home-corner-tl { left: 20px; }
+.home-corner-tr { right: 20px; }
+.home-rec-dot {
+  color: var(--danger);
+  animation: flickerNoir 3s ease-in-out infinite;
+}
+
+/* Main layout */
+.home-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 64px 20px 16px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ── Hero (left col on desktop) ── */
+.home-hero { text-align: center; width: 100%; }
+.home-dossie {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  color: var(--primary);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.home-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 60px;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--text);
+}
+.home-quote {
+  font-style: italic;
+  font-size: 14px;
+  color: var(--text-dim);
+  margin: 14px 0 0;
+  line-height: 1.55;
+}
+/* Mobile: short quote only */
+.home-quote-long { display: none; }
+.home-quote-short { display: inline; }
+
+.home-features {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ── Card (right col on desktop) ── */
+.home-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+.home-card-header {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--primary);
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.home-auth-row {
+  display: flex;
+  gap: 8px;
+}
+.home-auth-btn {
+  flex: 1 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  padding: 10px !important;
+}
+.home-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.home-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* Room code input overrides */
+.inp-code-field {
+  font-family: var(--font-mono) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.45em !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  font-size: 1.35rem !important;
+  padding: 14px !important;
+}
+.home-how-to-play {
+  display: block;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  margin-top: 2px;
+  transition: color .15s;
+}
+.home-how-to-play span { border-bottom: 1px dashed var(--text-dim); }
+.home-how-to-play:hover { color: var(--primary); }
+.home-how-to-play:hover span { border-color: var(--primary); }
+
+.home-footer {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: var(--muted);
+  padding: 16px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* ── Desktop 2-column ── */
+@media (min-width: 900px) {
+  .home-layout {
+    flex-direction: row;
+    align-items: center;
+    max-width: 1040px;
+    gap: 64px;
+    padding: 80px 48px 40px;
+  }
+  .home-hero {
+    flex: 1;
+    text-align: left;
+  }
+  .home-title { font-size: 90px; }
+  .home-quote-long  { display: inline; }
+  .home-quote-short { display: none; }
+  .home-features { justify-content: flex-start; }
+  .home-card {
+    width: 380px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+}
+
+/* ── How-to-play modal ── */
+.how-to-play-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.htp-rule {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.htp-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--primary);
+  letter-spacing: 0.2em;
+  flex-shrink: 0;
+  padding-top: 2px;
+  min-width: 24px;
+}
+.htp-title {
+  font-weight: 700;
+  font-size: .9rem;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.htp-desc {
+  font-size: .82rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
 /* ── TYPOGRAPHY ── */
 .title {
   font-family: var(--font-display);

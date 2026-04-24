@@ -14,19 +14,65 @@
 
 <!-- ══════════════ HOME ══════════════ -->
 <div id="screen-home" class="screen active">
-  <div class="container">
-    <div>
-      <h1 class="title">O Impostor</h1>
-      <p class="subtitle">"Um está entre vocês. Descubra quem."</p>
+
+  <!-- Corner decorations -->
+  <div class="home-corner-tl">CASO Nº 047 · CLASSIFICADO</div>
+  <div class="home-corner-tr"><span class="home-rec-dot">●</span> REC</div>
+
+  <!-- 2-column on desktop, single on mobile -->
+  <div class="home-layout">
+
+    <!-- LEFT: Brand / Hero -->
+    <div class="home-hero">
+      <div class="home-dossie">——— DOSSIÊ ———</div>
+      <h1 class="home-title">O Impostor</h1>
+      <p class="home-quote">
+        <span class="home-quote-long">"Um está entre vocês. Um só. Ele finge conhecer<br>a palavra — mas está apenas escutando.<br>Descubra quem antes que o tempo acabe."</span>
+        <span class="home-quote-short">"Um está entre vocês. Descubra quem."</span>
+      </p>
+      <div class="home-features">
+        <span>◆ 3–10 Jogadores</span>
+        <span>◆ Tempo real</span>
+        <span>◆ Multi-impostor</span>
+      </div>
     </div>
-    <div class="card">
-      <input type="text" id="inp-name" placeholder="Seu nome de detetive" maxlength="20" autocomplete="off">
-      <button class="btn btn-primary" id="btn-create">Abrir nova investigação</button>
-      <div class="divider">ou entre em uma sala</div>
-      <input type="text" id="inp-code" placeholder="A B 3 C" maxlength="4" style="font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.35em;font-weight:700;text-align:center;font-size:1.2rem;">
+
+    <!-- RIGHT: Form card -->
+    <div class="home-card">
+      <div class="home-card-header">◆ ENTRADA</div>
+
+      <!-- Auth buttons (future) -->
+      <div class="home-auth-row">
+        <button class="btn btn-secondary home-auth-btn" id="btn-login">👤 Entrar</button>
+        <button class="btn btn-secondary home-auth-btn" id="btn-register">＋ Criar conta</button>
+      </div>
+
+      <!-- Quick name -->
+      <div class="home-field">
+        <label class="home-label" for="inp-name">Identificação rápida (convidado)</label>
+        <input type="text" id="inp-name" placeholder="Seu nome de detetive" maxlength="20" autocomplete="off">
+      </div>
+
+      <button class="btn btn-primary" id="btn-create">▸ Abrir nova investigação</button>
+
+      <div class="divider">ou</div>
+
+      <!-- Room code -->
+      <div class="home-field">
+        <label class="home-label" for="inp-code">Código do caso</label>
+        <input type="text" id="inp-code" placeholder="A  B  3  C" maxlength="4" class="inp-code-field">
+      </div>
+
       <button class="btn btn-secondary" id="btn-join">Entrar na investigação</button>
+
+      <a class="home-how-to-play" id="btn-how-to-play" role="button">📖 <span>Como jogar?</span></a>
     </div>
+
   </div>
+
+  <!-- Footer -->
+  <div class="home-footer">🕵️ PROTOCOLO · ALPHA · 3 · USO · RESTRITO</div>
+
 </div>
 
 <!-- ══════════════ LOBBY ══════════════ -->
@@ -263,6 +309,53 @@
 <audio id="bg-music" loop preload="auto">
   <source src="assets/soundtrack.mp3" type="audio/mpeg">
 </audio>
+
+<!-- How to Play Modal -->
+<div id="how-to-play-modal" class="modal-overlay" style="display:none">
+  <div class="modal-box" style="max-width:500px;max-height:90vh;overflow-y:auto">
+    <div style="text-align:center;font-size:2rem;margin-bottom:4px">📖</div>
+    <h2 style="text-align:center;margin-bottom:4px">Como jogar?</h2>
+    <p style="text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:20px">O Impostor — Guia rápido</p>
+    <div class="how-to-play-rules">
+      <div class="htp-rule">
+        <div class="htp-num">01</div>
+        <div>
+          <div class="htp-title">Palavra secreta</div>
+          <div class="htp-desc">Todos os detetives recebem a mesma palavra secreta. O impostor <strong>não</strong> recebe a palavra (ou recebe apenas uma similar, se o modo estiver ativado).</div>
+        </div>
+      </div>
+      <div class="htp-rule">
+        <div class="htp-num">02</div>
+        <div>
+          <div class="htp-title">Rodadas de conversa</div>
+          <div class="htp-desc">Os jogadores se revezam fazendo declarações ou perguntas relacionadas à palavra. Detetives dão pistas sem revelar a palavra. O impostor finge que sabe.</div>
+        </div>
+      </div>
+      <div class="htp-rule">
+        <div class="htp-num">03</div>
+        <div>
+          <div class="htp-title">Votação</div>
+          <div class="htp-desc">Após todos falarem, o grupo pode votar para eliminar um suspeito. Acertaram o impostor? Detetives vencem. Erraram? O jogo continua!</div>
+        </div>
+      </div>
+      <div class="htp-rule">
+        <div class="htp-num">04</div>
+        <div>
+          <div class="htp-title">Chute do impostor</div>
+          <div class="htp-desc">A qualquer momento, o impostor pode chutar a palavra secreta. Se acertar, <strong>vence sozinho</strong>. Se errar, os detetives ganham imediatamente.</div>
+        </div>
+      </div>
+      <div class="htp-rule">
+        <div class="htp-num">05</div>
+        <div>
+          <div class="htp-title">Multi-impostor</div>
+          <div class="htp-desc">Com 2+ impostores, o host configura o número antes do jogo. Impostores têm um chat secreto entre eles para se coordenar. Vencem se igualarem ou superarem os detetives vivos.</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btn-close-htp" style="margin-top:20px">Entendido, vamos jogar!</button>
+  </div>
+</div>
 
 <!-- Toast -->
 <div id="toast"></div>

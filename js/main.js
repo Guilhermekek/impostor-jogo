@@ -73,6 +73,22 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-create').addEventListener('click', createRoom);
   document.getElementById('btn-join').addEventListener('click', joinRoom);
 
+  document.getElementById('btn-login').addEventListener('click', () =>
+    toast('Login com conta — em breve! 🔐'));
+  document.getElementById('btn-register').addEventListener('click', () =>
+    toast('Cadastro — em breve! 🔐'));
+
+  document.getElementById('btn-how-to-play').addEventListener('click', () => {
+    document.getElementById('how-to-play-modal').style.display = 'flex';
+  });
+  document.getElementById('btn-close-htp').addEventListener('click', () => {
+    document.getElementById('how-to-play-modal').style.display = 'none';
+  });
+  document.getElementById('how-to-play-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('how-to-play-modal'))
+      document.getElementById('how-to-play-modal').style.display = 'none';
+  });
+
   ['inp-name', 'inp-code'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => {
       if (e.key === 'Enter') {
