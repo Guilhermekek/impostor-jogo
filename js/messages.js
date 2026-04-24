@@ -76,24 +76,38 @@ async function sendMsg(type) {
     updates['pendingAnswer'] = null;
     updates['roundActed'] = newActed;
     if (allActed) {
+      const nextRound = (S.roomData?.round || 1) + 1;
       updates['votingEnabled'] = true;
       updates['roundActed']    = null;
+      updates['round']         = nextRound;
       const sysKey2 = roomRef.child('messages').push().key;
       updates[`messages/${sysKey2}`] = {
         type: 'system',
-        text: '🗳️ Todos falaram! Votação habilitada.',
+        text: `Rodada ${nextRound} · Começou — Votação disponível`,
         ts: Date.now() + 1,
       };
     }
   } else {
     // Pergunta conta o turno do perguntador, mas aguarda a resposta
-    const { newActed } = actorUpdate(S.playerId, S.roomData);
+    const { newActed, allActed: qAllActed } = actorUpdate(S.playerId, S.roomData);
     updates['roundActed'] = newActed;
     updates['pendingAnswer'] = {
       targetId, targetName,
       askerName: S.playerName,
       questionText: text,
     };
+    if (qAllActed) {
+      const nextRound = (S.roomData?.round || 1) + 1;
+      updates['votingEnabled'] = true;
+      updates['roundActed']    = null;
+      updates['round']         = nextRound;
+      const sysKey2 = roomRef.child('messages').push().key;
+      updates[`messages/${sysKey2}`] = {
+        type: 'system',
+        text: `Rodada ${nextRound} · Começou — Votação disponível`,
+        ts: Date.now() + 1,
+      };
+    }
   }
 
   await roomRef.update(updates);
