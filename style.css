@@ -552,7 +552,10 @@ h3 { font-size: 1rem; font-weight: 600; color: var(--muted); text-transform: upp
 }
 
 /* ── INPUTS ── */
-input[type="text"], textarea, select {
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea, select {
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -569,10 +572,25 @@ select option {
   background: var(--surface);
   color: var(--text);
 }
-input[type="text"]:focus, textarea:focus, select:focus { border-color: var(--primary); }
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus, select:focus { border-color: var(--primary); outline: none; }
+
+/* Força fundo escuro no autocomplete do browser */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 100px var(--bg-elev) inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+  caret-color: var(--text);
+}
 textarea { resize: vertical; min-height: 76px; }
 select { cursor: pointer; }
-input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+textarea::placeholder { color: var(--muted); }
 
 /* ── BUTTONS ── */
 .btn {
