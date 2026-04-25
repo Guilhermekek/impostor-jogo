@@ -80,6 +80,9 @@ function setupAuthListeners() {
       }
     });
   });
+  document.getElementById('register-password').addEventListener('input', e => {
+    updatePasswordStrength(e.target.value);
+  });
   document.getElementById('register-password2').addEventListener('keydown', e => {
     if (e.key === 'Enter') registerEmail();
   });
@@ -193,4 +196,27 @@ function authErrorMsg(code) {
     'auth/too-many-requests':       'Muitas tentativas. Aguarde um momento.',
   };
   return map[code] || 'Erro inesperado: ' + code;
+}
+
+// ── Password strength indicator ──────────────
+function updatePasswordStrength(pw) {
+  const bars  = [1,2,3,4].map(i => document.getElementById('pw-bar-' + i));
+  const label = document.getElementById('pw-strength-label');
+  if (!bars[0] || !label) return;
+
+  let score = 0;
+  if (pw.length >= 6)  score++;                                // comprimento mínimo
+  if (pw.length >= 10) score++;                                // comprimento bom
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;          // misto de caixa
+  if (/[0-9]/.test(pw) || /[^A-Za-z0-9]/.test(pw)) score++;  // número ou símbolo
+
+  const COLORS = ['var(--danger)', 'var(--warning)', 'var(--primary)', 'var(--success)'];
+  const LABELS = ['', 'Fraca', 'Razoável', 'Boa', 'Forte'];
+  const color  = score > 0 ? COLORS[score - 1] : 'var(--border)';
+
+  bars.forEach((b, i) => {
+    b.style.background = i < score ? color : 'var(--border)';
+  });
+  label.textContent  = pw.length ? (LABELS[score] || '') : '';
+  label.style.color  = score > 0 ? color : 'var(--muted)';
 }

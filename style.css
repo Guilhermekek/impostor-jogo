@@ -274,56 +274,179 @@ body::after {
 
 /* ── Auth modals ── */
 .auth-modal-box {
-  max-width: 380px;
+  max-width: 400px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+  border-top: 2px solid var(--primary) !important;
+  background: var(--bg-elev) !important;
+  padding: 28px 26px 24px !important;
 }
-.auth-modal-icon {
-  font-size: 1.6rem;
+
+/* Modal header block */
+.auth-modal-header {
   text-align: center;
+  margin-bottom: 4px;
 }
+.auth-mono-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  color: var(--primary);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.auth-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  letter-spacing: 0.03em;
+}
+
+/* Field labels */
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.auth-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+}
+
+/* Google button */
 .btn-google {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: var(--surface2);
+  background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  color: var(--text);
-  padding: 11px 20px;
-  font-size: .88rem;
+  color: var(--text-dim);
+  padding: 10px 16px;
+  font-size: .85rem;
   font-family: var(--font-ui);
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   text-transform: none;
   cursor: pointer;
   width: 100%;
-  transition: border-color .18s, background .18s;
+  transition: border-color .18s, color .18s, background .18s;
 }
-.btn-google:hover { border-color: var(--border-hi); background: var(--surface); }
+.btn-google:hover {
+  border-color: var(--border-hi);
+  color: var(--text);
+  background: var(--surface);
+}
+
+/* Auth divider "ou" */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin: -2px 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Error message */
 .auth-error {
   color: var(--danger);
-  font-size: .8rem;
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  letter-spacing: 0.04em;
   text-align: center;
-  min-height: 16px;
+  min-height: 14px;
   margin: -4px 0;
 }
-.auth-switch {
-  text-align: center;
-  font-size: .82rem;
-  color: var(--muted);
+
+/* Footer row: cancel + switch link */
+.auth-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-top: 2px;
+}
+.auth-ghost-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  padding: 0;
+  transition: color .15s;
+}
+.auth-ghost-btn:hover { color: var(--text-dim); }
+.auth-switch {
+  font-size: .8rem;
+  color: var(--muted);
 }
 .auth-link {
   color: var(--primary);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
+  transition: color .15s;
 }
 .auth-link:hover { color: var(--primary-light); }
+
+/* ── Password strength bar ── */
+.pw-strength {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3px;
+  height: 14px;
+}
+.pw-strength-bars {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+}
+.pw-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background .3s;
+}
+.pw-strength-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+  min-width: 54px;
+  text-align: right;
+  transition: color .3s;
+}
 
 /* Logged-in chip in home auth row */
 .home-user-chip {
