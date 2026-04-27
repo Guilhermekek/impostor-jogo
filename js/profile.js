@@ -238,6 +238,12 @@ function confirmAvatar() {
   _committedAvatar = _selectedAvatar;
   renderIdentity(); // atualiza o avatar grande no card
   document.getElementById('btn-confirm-avatar').classList.remove('pulse-ready');
+
+  // Re-renderiza o chip do usuário no home pra refletir o novo avatar
+  if (typeof updateAuthUI === 'function') {
+    updateAuthUI(firebase.auth().currentUser);
+  }
+
   toast(`Disfarce trocado: ${getAvatarById(_selectedAvatar).label} ✓`);
 }
 
