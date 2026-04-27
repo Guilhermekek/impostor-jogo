@@ -36,11 +36,13 @@ CRITÉRIOS DE LIMPEZA
 
 Uma sala é marcada para limpeza quando:
 
-  • state == 'gameOver' E age > 1 hora
-        → partida acabou e ninguém fechou
+  • state == 'gameOver' E age > 7 dias
+        → preserva histórico de partidas finalizadas pra que
+          os usuários possam consultar; depois de 7 dias apaga
   • state == 'lobby' E age > 24 horas
         → lobby abandonado (escapou do onDisconnect.remove())
   • Todos jogadores desconectados E age > 1 hora
+        (apenas para salas QUE NÃO ESTÃO em gameOver)
         → ninguém ativo na sala
   • age > 7 dias (qualquer state)
         → garbage collector geral
@@ -65,9 +67,9 @@ HOUR = 60 * 60 * 1000
 DAY  = 24 * HOUR
 
 CRITERIA = {
-    'gameOver_old':       1 * HOUR,    # gameOver com mais de 1h → apaga
+    'gameOver_old':       7 * DAY,     # gameOver: preservar 7 dias pra histórico
     'lobby_abandoned':    24 * HOUR,   # lobby com mais de 24h → apaga
-    'all_disconnected':   1 * HOUR,    # ninguém conectado há +1h → apaga
+    'all_disconnected':   1 * HOUR,    # ninguém conectado há +1h → apaga (exceto gameOver)
     'any_old':            7 * DAY,     # qualquer sala com +7 dias → apaga
 }
 
@@ -105,16 +107,30 @@ def evaluate_room(code, data, now_ms):
     players = (data or {}).get('players') or {}
     connected = sum(1 for p in players.values() if (p or {}).get('isConnected'))
 
-    if state == 'gameOver' and age > CRITERIA['gameOver_old']:
-        return 'gameOver antigo (>1h)'
+    # gameOver: preservamos 7 dias pra que usuários possam consultar histórico
+    # Importante: early return — não aplicamos os critérios "all_disconnected"
+    # e "no players" aqui, senão apagaríamos jogos finalizados rápido demais.
+    if state == 'gameOver':
+        if age > CRITERIA['gameOver_old']:
+            return f'gameOver antigo (>{CRITERIA["gameOver_old"] // DAY}d)'
+        return None
+
+    # Lobby abandonado
     if state == 'lobby' and age > CRITERIA['lobby_abandoned']:
         return 'lobby abandonado (>24h)'
+
+    # Garbage collector geral
     if age > CRITERIA['any_old']:
         return f'sala muito antiga (>{CRITERIA["any_old"] // DAY}d)'
+
+    # Sem jogadores cadastrados (sala fantasma)
     if not players:
         return 'sala sem jogadores'
+
+    # Todos desconectados (apenas para estados que não sejam gameOver)
     if connected == 0 and age > CRITERIA['all_disconnected']:
         return 'todos desconectados (>1h)'
+
     return None
 
 
