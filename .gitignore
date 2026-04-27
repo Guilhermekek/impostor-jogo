@@ -4,6 +4,17 @@ firebase-config.js
 # Scripts de auditoria local — não fazem parte do jogo
 security-test.js
 
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Artefatos de teste do validador de imagens
+clean_*.png
+teste.*
+test-*.jpg
+test-*.png
+
 # Dependências
 node_modules/
 
