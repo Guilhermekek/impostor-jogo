@@ -27,13 +27,6 @@ async function startGame() {
   const firstTurnId = connectedPlayers(players)
     .sort((a, b) => a[1].joinedAt - b[1].joinedAt)[0][0];
 
-  // Cancela o auto-destruir-lobby registrado em createRoom().
-  // A partir daqui o jogo está em andamento e não deve ser apagado
-  // se o host desconectar.
-  if (S.isHost) {
-    roomRef.onDisconnect().cancel();
-  }
-
   await roomRef.update({
     ...playerUpdates,
     'config/similarWordMode': similarWordMode,
