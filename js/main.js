@@ -21,6 +21,13 @@ function listenRoom() {
     S.roomData = data;
     const changed = data.state !== S.prevGameState;
     S.prevGameState = data.state;
+
+    // Atualiza o "reaper" da sala (último conectado registra auto-delete)
+    // Roda em todo update porque players entram/saem em qualquer momento.
+    if (typeof updateAutoCleanup === 'function') {
+      updateAutoCleanup(data);
+    }
+
     handleUpdate(data, changed);
   });
 }

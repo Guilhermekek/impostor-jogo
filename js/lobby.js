@@ -30,6 +30,7 @@ async function createRoom() {
   });
 
   roomRef.child(`players/${S.playerId}/isConnected`).onDisconnect().set(false);
+
   enterLobby();
   listenRoom();
 }
@@ -111,8 +112,40 @@ function enterLobby() {
   screen('lobby');
 }
 
+// ══════════════════════════════════════════════
+//  AUTO-CLEANUP: o último jogador conectado vira o "reaper"
+//  Quando ele desconectar, a sala é deletada automaticamente.
+//  Chamado em cada atualização da sala (de main.js → handleUpdate).
+// ══════════════════════════════════════════════
+function updateAutoCleanup(data) {
+  if (!roomRef || !data) return;
+  const players = data.players || {};
+  const me = players[S.playerId];
+  if (!me || !me.isConnected) return; // se eu não estou na sala/conectado, não faz nada
+
+  // Conta quantos estão conectados além de mim
+  const otherConnected = Object.entries(players)
+    .filter(([id, p]) => id !== S.playerId && p?.isConnected).length;
+
+  if (otherConnected === 0) {
+    // Sou o único conectado → registro o auto-delete da sala inteira
+    // Idempotente: chamar várias vezes não causa problema, Firebase só
+    // executa uma vez quando a conexão cair.
+    roomRef.onDisconnect().remove();
+  } else {
+    // Tem mais gente → cancelo o auto-delete (caso eu tivesse registrado antes)
+    roomRef.onDisconnect().cancel();
+    // E re-registro só o "marcar como desconectado" do meu próprio player
+    roomRef.child(`players/${S.playerId}/isConnected`).onDisconnect().set(false);
+  }
+}
+
 async function leaveLobby() {
   if (!roomRef) { screen('home'); return; }
+
+  // Cancela qualquer onDisconnect que tenhamos registrado nesta sessão
+  // (evita que executem após sairmos voluntariamente)
+  roomRef.onDisconnect().cancel();
 
   if (S.isHost) {
     // Host apaga a sala inteira
