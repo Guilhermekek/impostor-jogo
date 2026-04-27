@@ -259,6 +259,82 @@
   </div>
 </div>
 
+<!-- ══════════════ PROFILE ══════════════ -->
+<div id="screen-profile" class="screen">
+
+  <!-- Top bar -->
+  <div class="profile-topbar">
+    <button class="btn btn-secondary profile-back" id="btn-profile-back">← Voltar</button>
+    <div class="profile-topbar-tag">DOSSIÊ · PESSOAL</div>
+    <div class="profile-topbar-spacer"></div>
+  </div>
+
+  <div class="profile-body">
+
+    <!-- Identity card -->
+    <div class="profile-identity">
+      <div class="profile-avatar-big" id="profile-avatar-big">🎩</div>
+      <div class="profile-identity-info">
+        <div class="profile-agent-num" id="profile-agent-num">AGENTE Nº 047</div>
+        <div class="profile-name display" id="profile-name">Detetive</div>
+        <div class="profile-active-since" id="profile-active-since">ATIVO DESDE · —</div>
+      </div>
+    </div>
+
+    <!-- Mini stats strip -->
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-label">Casos</div>
+        <div class="profile-stat-value display" id="stat-total">0</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-label">Vitórias</div>
+        <div class="profile-stat-value display" id="stat-winrate">0%</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-label">Como Impostor</div>
+        <div class="profile-stat-value display" id="stat-impostor">0/0</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="profile-tabs">
+      <button class="profile-tab on" data-tab="history" id="tab-history">Histórico</button>
+      <button class="profile-tab" data-tab="avatar" id="tab-avatar">Identidade</button>
+    </div>
+
+    <!-- History tab -->
+    <div class="profile-tab-content" id="tab-content-history">
+      <div class="profile-history-header">
+        <div class="profile-history-count" id="history-count">CASOS ENCERRADOS · 0</div>
+        <div class="profile-history-streak">
+          Sequência: <span class="profile-history-streak-value" id="history-streak">0</span>
+        </div>
+      </div>
+      <div class="profile-history-list" id="history-list">
+        <!-- Preenchido dinamicamente por profile.js -->
+      </div>
+      <div class="profile-history-empty" id="history-empty" style="display:none">
+        <div class="profile-history-empty-icon">📁</div>
+        <div class="profile-history-empty-title">Nenhum caso registrado</div>
+        <div class="profile-history-empty-sub">Suas investigações aparecerão aqui após o primeiro jogo.</div>
+      </div>
+    </div>
+
+    <!-- Avatar tab -->
+    <div class="profile-tab-content" id="tab-content-avatar" style="display:none">
+      <div class="profile-avatar-label">DISFARCE DO AGENTE</div>
+      <div class="profile-avatar-sub">Escolha como os outros suspeitos vão te reconhecer no caso.</div>
+      <div class="profile-avatar-grid" id="avatar-grid">
+        <!-- Preenchido dinamicamente por profile.js -->
+      </div>
+      <button class="btn btn-primary profile-confirm-btn" id="btn-confirm-avatar">▸ Confirmar disfarce</button>
+      <div class="profile-avatar-hint">◆ MAIS DISFARCES SERÃO LIBERADOS AO SUBIR DE PATENTE</div>
+    </div>
+
+  </div>
+</div>
+
 <!-- Turn popup -->
 <div id="turn-popup" class="turn-popup" style="display:none">
   <div class="turn-popup-inner">
@@ -460,6 +536,7 @@
 <!-- Módulos do jogo (ordem importa: dependências primeiro) -->
 <script src="js/state.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/profile.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/turns.js"></script>
