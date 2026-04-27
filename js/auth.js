@@ -21,9 +21,15 @@ function updateAuthUI(user) {
     const nameInput = document.getElementById('inp-name');
     if (nameInput && !nameInput.value) nameInput.value = name;
 
+    // Glyph do avatar escolhido (fallback para letra inicial se profile.js não carregou)
+    const avatarGlyph = (typeof getCurrentAvatarGlyph === 'function')
+      ? getCurrentAvatarGlyph()
+      : name.charAt(0).toUpperCase();
+
     row.innerHTML = `
       <div class="home-user-chip">
-        <div class="home-user-avatar">${escHtml(name.charAt(0).toUpperCase())}</div>
+        <button class="home-user-avatar home-user-avatar-btn" id="btn-open-profile"
+                title="Abrir dossiê" aria-label="Abrir perfil">${escHtml(avatarGlyph)}</button>
         <span class="home-user-name">${escHtml(name)}</span>
         <button class="btn btn-secondary home-auth-btn" id="btn-logout"
           style="width:auto;padding:7px 14px;flex-shrink:0">Sair</button>
@@ -31,6 +37,9 @@ function updateAuthUI(user) {
     document.getElementById('btn-logout').addEventListener('click', async () => {
       await firebase.auth().signOut();
       toast('Você saiu da conta.');
+    });
+    document.getElementById('btn-open-profile').addEventListener('click', () => {
+      if (typeof openProfile === 'function') openProfile();
     });
   } else {
     row.innerHTML = `
