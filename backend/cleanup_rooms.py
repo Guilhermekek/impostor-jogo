@@ -46,6 +46,41 @@ Uma sala é marcada para limpeza quando:
         → ninguém ativo na sala
   • age > 7 dias (qualquer state)
         → garbage collector geral
+
+═══════════════════════════════════════════════════════════════
+⚠️  TESTES PENDENTES
+═══════════════════════════════════════════════════════════════
+
+Foi feita a mudança de critério de gameOver (1h → 7 dias) sem
+testar todos os cenários. Quando tiver tempo, validar:
+
+  [ ] Sala em gameOver com 0 conectados e age < 7d → MANTER
+      (antes da correção, era apagada após 1h por all_disconnected)
+
+  [ ] Sala em gameOver com 0 conectados e age > 7d → APAGAR
+      (deve cair em gameOver_old)
+
+  [ ] Sala em playing com 0 conectados e age > 1h → APAGAR
+      (gameOver é exceção, mas playing continua sendo apagado por
+       all_disconnected)
+
+  [ ] Sala em lobby com age > 24h → APAGAR
+      (lobby_abandoned, sem mudança de comportamento)
+
+  [ ] Sala em qualquer state com age > 7d → APAGAR
+      (any_old, sem mudança de comportamento)
+
+  [ ] Confirmar que dry-run NÃO apaga nada
+      (rodar sem --delete e checar Firebase Console)
+
+  [ ] Confirmar que --delete pede confirmação "SIM"
+      (digitar "sim" minúsculo deve cancelar)
+
+Como criar salas em estados específicos para testar:
+  - gameOver: jogar uma partida até o fim
+  - playing: iniciar partida e fechar abas
+  - lobby: criar sala e não iniciar
+  - sala antiga (>24h ou >7d): editar createdAt no Firebase Console
 """
 
 import sys
