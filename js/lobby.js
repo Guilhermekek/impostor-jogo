@@ -30,6 +30,19 @@ async function createRoom() {
   });
 
   roomRef.child(`players/${S.playerId}/isConnected`).onDisconnect().set(false);
+
+  // ── AUTO-DESTRUIR LOBBY ABANDONADO ────────────
+  // Se o host fechar o browser durante o lobby (antes do jogo começar),
+  // a sala inteira é deletada automaticamente. Isso evita acúmulo de
+  // lobbies abandonados no Firebase.
+  //
+  // Atenção: um page reload do host também dispara isso → host perde a
+  // sala. Trade-off aceitável pra evitar lixo no DB.
+  //
+  // Cancelado em startGame() quando o jogo inicia (game.js).
+  // Cancelado em leaveLobby() quando o host sai voluntariamente.
+  roomRef.onDisconnect().remove();
+
   enterLobby();
   listenRoom();
 }
@@ -115,7 +128,9 @@ async function leaveLobby() {
   if (!roomRef) { screen('home'); return; }
 
   if (S.isHost) {
-    // Host apaga a sala inteira
+    // Host apaga a sala inteira manualmente
+    // Cancela o onDisconnect.remove() pra evitar dupla operação
+    roomRef.onDisconnect().cancel();
     roomRef.off();
     await roomRef.remove();
   } else {

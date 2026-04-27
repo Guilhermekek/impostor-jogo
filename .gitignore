@@ -1,5 +1,8 @@
 # Credenciais Firebase — NÃO commitar!
 firebase-config.js
+backend/service-account.json
+backend/*-firebase-adminsdk-*.json
+*service-account*.json
 
 # Scripts de auditoria local — não fazem parte do jogo
 security-test.js
