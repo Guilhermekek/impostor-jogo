@@ -1,0 +1,34 @@
+name: Auditoria de Segurança
+
+on:
+  # Roda toda segunda-feira às 09:00 UTC (06:00 horário de Brasília)
+  schedule:
+    - cron: '0 9 * * 1'
+
+  # Roda a cada push na main (depois do deploy)
+  push:
+    branches: [ main ]
+
+  # Permite rodar manualmente pela aba Actions do GitHub
+  workflow_dispatch:
+
+jobs:
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Rodar auditoria de regras do Firebase
+        run: node .github/scripts/security-check-ci.js
+
+      - name: Notificar falha
+        if: failure()
+        run: |
+          echo "::error::❌ Auditoria de segurança FALHOU. Verifique as regras do Realtime Database."
+          echo "::warning::Revise: https://console.firebase.google.com/project/impostorjogo-76625/database"
