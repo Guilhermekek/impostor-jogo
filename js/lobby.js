@@ -179,13 +179,20 @@ function renderLobby(players, config) {
     const chkSim = document.getElementById('chk-similar');
     if (chkSim && config.similarWordMode !== undefined) chkSim.checked = config.similarWordMode;
   }
-  connectedPlayers(players).forEach(([id, p]) => {
+
+  const list = connectedPlayers(players);
+  const countEl = document.getElementById('lobby-count');
+  if (countEl) countEl.textContent = list.length;
+
+  list.forEach(([id, p], i) => {
     const d = document.createElement('div');
     d.className = 'player-item';
+    d.style.animationDelay = `${i * 0.05}s`;
     d.innerHTML = `
+      <div class="player-num">${String(i + 1).padStart(2, '0')}</div>
       <div class="player-avatar">${initial(p.name)}</div>
-      <span class="player-name">${escHtml(p.name)}${id === S.playerId ? ' <span style="color:var(--muted);font-size:.8rem">(você)</span>' : ''}</span>
-      ${id === hostId ? '<span class="player-badge">Host</span>' : ''}
+      <span class="player-name">${escHtml(p.name)}${id === S.playerId ? ' <span class="player-you">(você)</span>' : ''}</span>
+      ${id === hostId ? '<span class="player-badge">Narrador</span>' : ''}
     `;
     el.appendChild(d);
   });
