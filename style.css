@@ -1547,15 +1547,22 @@ textarea::placeholder { color: var(--muted); }
   animation: ra-reveal-clip 0.9s cubic-bezier(0.7, 0, 0.3, 1) 1.7s both;
 }
 
-/* Confetti pieces (win only) */
+/* Confetti — overlay fullscreen sobre toda a tela */
+.confetti-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9000;
+  overflow: hidden;
+}
 .result-confetti {
   position: absolute;
   top: 0;
-  width: 5px;
-  height: 12px;
+  width: 6px;
+  height: 14px;
   opacity: 0;
   pointer-events: none;
-  z-index: 1;
+  border-radius: 1px;
   animation-name: ra-confetti;
   animation-timing-function: ease-in;
   animation-fill-mode: forwards;
@@ -1593,9 +1600,10 @@ textarea::placeholder { color: var(--muted); }
   50%      { box-shadow: 0 0 0 6px oklch(0.78 0.14 75 / 0.30); }
 }
 @keyframes ra-confetti {
-  0%   { transform: translateY(-30px) rotate(0deg); opacity: 0; }
-  10%  { opacity: 1; }
-  100% { transform: translateY(560px) rotate(540deg); opacity: 0; }
+  0%   { transform: translateY(-40px) rotate(0deg);   opacity: 0; }
+  8%   { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
 }
 @keyframes ra-grain-pulse {
   0%, 100% { opacity: 0.18; }

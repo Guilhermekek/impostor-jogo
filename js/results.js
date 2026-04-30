@@ -2,6 +2,30 @@
 //  results.js — Resultado da rodada e fim de jogo
 // ══════════════════════════════════════════════
 
+// Cria overlay fullscreen de confete (cobre toda a tela, não só o card).
+// Limpa qualquer overlay anterior e remove a si mesmo após 8s.
+function spawnConfetti(count = 60) {
+  document.querySelectorAll('.confetti-overlay').forEach(el => el.remove());
+
+  const overlay = document.createElement('div');
+  overlay.className = 'confetti-overlay';
+
+  const palette = ['var(--primary)', 'var(--success)', 'var(--text-dim)', 'oklch(0.50 0.10 80)'];
+  for (let i = 0; i < count; i++) {
+    const left  = (i * 137) % 100; // distribuição estilo golden-ratio
+    const color = palette[i % 4];
+    const dur   = 3.0 + (i % 6) * 0.45;
+    const delay = (i * 0.06) % 2.5;
+    const el = document.createElement('span');
+    el.className = 'result-confetti';
+    el.style.cssText = `left:${left}%;background:${color};animation-duration:${dur}s;animation-delay:${delay}s;`;
+    overlay.appendChild(el);
+  }
+
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.remove(), 8000);
+}
+
 function showRoundResult(data) {
   const players     = data.players || {};
   const elimId      = data.eliminatedThisRound;
@@ -46,22 +70,8 @@ function showRoundResult(data) {
       </div>`;
   }
 
-  // Confetti — só na vitória
-  let confetti = '';
-  if (detectivesWon) {
-    const palette = ['var(--primary)', 'var(--success)', 'var(--text-dim)', 'oklch(0.50 0.10 80)'];
-    confetti = Array.from({ length: 22 }, (_, i) => {
-      const left  = (i * 7 + 3) % 100;
-      const color = palette[i % 4];
-      const dur   = 2.4 + (i % 5) * 0.3;
-      const delay = 0.6 + (i * 0.07) % 2;
-      return `<span class="result-confetti" style="left:${left}%;background:${color};animation-duration:${dur}s;animation-delay:${delay}s;"></span>`;
-    }).join('');
-  }
-
   card.className = `result-card-noir result-${variant}`;
   card.innerHTML = `
-    ${confetti}
     <div class="result-grain-pulse"></div>
     <div class="result-content">
       <div class="result-stamp">${stamp}</div>
@@ -69,6 +79,8 @@ function showRoundResult(data) {
       <div class="result-subtitle">${subtitle}</div>
       ${wordBox}
     </div>`;
+
+  if (detectivesWon) spawnConfetti(50);
 
   // Build host actions dynamically — what makes sense depends on the outcome
   if (S.isHost) {
@@ -194,24 +206,10 @@ function showGameOver(data) {
       : 'O impostor enganou todos até o fim.';
   }
 
-  // Confetti — só pra quem ganhou
-  let confetti = '';
-  if (iWon) {
-    const palette = ['var(--primary)', 'var(--success)', 'var(--text-dim)', 'oklch(0.50 0.10 80)'];
-    confetti = Array.from({ length: 22 }, (_, i) => {
-      const left  = (i * 7 + 3) % 100;
-      const color = palette[i % 4];
-      const dur   = 2.4 + (i % 5) * 0.3;
-      const delay = 0.6 + (i * 0.07) % 2;
-      return `<span class="result-confetti" style="left:${left}%;background:${color};animation-duration:${dur}s;animation-delay:${delay}s;"></span>`;
-    }).join('');
-  }
-
   const impLabel = impostorIds.length > 1 ? 'Os impostores eram' : 'O impostor era';
 
   card.className = `result-card-noir result-${variant}`;
   card.innerHTML = `
-    ${confetti}
     <div class="result-grain-pulse"></div>
     <div class="result-content">
       <div class="result-stamp">${stamp}</div>
@@ -245,6 +243,14 @@ function showGameOver(data) {
     b.style.opacity = '0';
     b.style.animation = rise + pulse;
   });
+
+  // Confete fullscreen + som de vitória/derrota
+  if (iWon) {
+    spawnConfetti(60);
+    playVictorySound();
+  } else {
+    playDefeatSound();
+  }
 
   screen('gameover');
 }
