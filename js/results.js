@@ -172,32 +172,80 @@ function showGameOver(data) {
   const similarMode = data.config?.similarWordMode;
   const card        = document.getElementById('gameover-card');
 
-  const winPlayers = data.winner === 'players';
-  const guessCtx = data.impostorKicked
-    ? `👢 O impostor foi removido pelo host!`
-    : data.impostorGuess
-      ? (data.impostorGuessedCorrectly
-          ? `O impostor chutou "<strong>${escHtml(data.impostorGuess)}</strong>" e acertou!`
-          : `O impostor chutou "<strong>${escHtml(data.impostorGuess)}</strong>" e errou!`)
-      : (winPlayers ? 'Os impostores foram descobertos!' : 'Os impostores enganaram todo mundo!');
+  const winPlayers  = data.winner === 'players';
+  const iAmImpostor = impostorIds.includes(S.playerId);
+  const iWon        = (winPlayers && !iAmImpostor) || (!winPlayers && iAmImpostor);
 
-  const impLabel = impostorIds.length > 1 ? 'Os impostores eram:' : 'O impostor era:';
+  const stamp    = iWon ? '◆ CASO ENCERRADO ◆' : '◈ INVESTIGAÇÃO FRACASSOU ◈';
+  const variant  = iWon ? 'win' : 'loss';
+  const headline = iWon ? 'Você venceu' : 'Você perdeu';
 
+  // Subtitle context — prioriza eventos especiais (kick / chute final)
+  let subtitle;
+  if (data.impostorKicked) {
+    subtitle = 'O impostor foi removido pelo host.';
+  } else if (data.impostorGuess) {
+    subtitle = data.impostorGuessedCorrectly
+      ? `O impostor chutou "${escHtml(data.impostorGuess)}" e acertou.`
+      : `O impostor chutou "${escHtml(data.impostorGuess)}" e errou.`;
+  } else {
+    subtitle = winPlayers
+      ? 'Os detetives expuseram o impostor.'
+      : 'O impostor enganou todos até o fim.';
+  }
+
+  // Confetti — só pra quem ganhou
+  let confetti = '';
+  if (iWon) {
+    const palette = ['var(--primary)', 'var(--success)', 'var(--text-dim)', 'oklch(0.50 0.10 80)'];
+    confetti = Array.from({ length: 22 }, (_, i) => {
+      const left  = (i * 7 + 3) % 100;
+      const color = palette[i % 4];
+      const dur   = 2.4 + (i % 5) * 0.3;
+      const delay = 0.6 + (i * 0.07) % 2;
+      return `<span class="result-confetti" style="left:${left}%;background:${color};animation-duration:${dur}s;animation-delay:${delay}s;"></span>`;
+    }).join('');
+  }
+
+  const impLabel = impostorIds.length > 1 ? 'Os impostores eram' : 'O impostor era';
+
+  card.className = `result-card-noir result-${variant}`;
   card.innerHTML = `
-    <div class="big-icon">${winPlayers ? '🏆' : '🕵️'}</div>
-    <div class="big-title ${winPlayers ? 'win-p' : 'win-i'}">
-      ${winPlayers ? 'Jogadores vencem!' : 'Impostores vencem!'}
-    </div>
-    <div class="big-sub">${guessCtx}</div>
-    <div style="margin-top:20px;width:100%">
-      <div class="info-line">${impLabel}</div>
-      <div class="info-val" style="margin-top:4px">${escHtml(impNames)}</div>
-    </div>
-    <div style="width:100%">
-      <div class="info-line">A palavra era:</div>
-      <span class="reveal-word">${escHtml(pair.word)}</span>
-      ${similarMode ? `<div class="info-line" style="margin-top:8px">Palavra do(s) impostor(es): <strong>${escHtml(pair.similar)}</strong></div>` : ''}
+    ${confetti}
+    <div class="result-grain-pulse"></div>
+    <div class="result-content">
+      <div class="result-stamp">${stamp}</div>
+      <div class="result-headline display">${headline}</div>
+      <div class="result-subtitle">${subtitle}</div>
+
+      <div class="result-info-line">
+        <div class="result-info-label">${impLabel.toUpperCase()}</div>
+        <div class="result-info-val">${escHtml(impNames)}</div>
+      </div>
+
+      <div class="result-word-box" style="animation-delay: 1.7s">
+        <div class="result-word-label">A PALAVRA ERA</div>
+        <div class="result-word" style="animation-delay: 2.0s">${escHtml(pair.word)}</div>
+      </div>
+
+      ${similarMode ? `
+        <div class="result-info-line" style="animation-delay: 2.0s">
+          <div class="result-info-label">PALAVRA DO IMPOSTOR</div>
+          <div class="result-info-val">${escHtml(pair.similar)}</div>
+        </div>` : ''}
     </div>`;
+
+  // Aplica animação de subida + pulse no botão primário
+  const pulseName = iWon ? 'ra-pulse-success' : 'ra-pulse-danger';
+  document.querySelectorAll('#screen-gameover .btn').forEach((b, i) => {
+    const rise = `ra-btn-rise 0.4s ease-out ${2.6 + i * 0.12}s forwards`;
+    const pulse = b.classList.contains('btn-primary')
+      ? `, ${pulseName} 2.2s ease-in-out ${3.4 + i * 0.12}s infinite`
+      : '';
+    b.style.opacity = '0';
+    b.style.animation = rise + pulse;
+  });
+
   screen('gameover');
 }
 

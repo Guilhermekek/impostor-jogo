@@ -1502,6 +1502,26 @@ textarea::placeholder { color: var(--muted); }
   animation: ra-fade-in 0.5s ease-out 1.1s forwards;
 }
 
+/* Info line (impostor name, similar word) */
+.result-info-line {
+  margin-top: 16px;
+  margin-bottom: 0;
+  opacity: 0;
+  animation: ra-fade-in 0.5s ease-out 1.4s forwards;
+}
+.result-info-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.3em;
+  margin-bottom: 4px;
+}
+.result-info-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
 /* Word reveal — clip-path wipe */
 .result-word-box {
   display: inline-block;
