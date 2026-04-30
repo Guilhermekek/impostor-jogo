@@ -77,36 +77,57 @@
 
 <!-- ══════════════ LOBBY ══════════════ -->
 <div id="screen-lobby" class="screen">
-  <div class="container">
-    <button class="btn-back" id="btn-leave-lobby">← Voltar</button>
-    <h2><span class="mono">SALA DE ESPERA</span></h2>
-    <div class="room-code-display">
-      <span id="show-code"></span>
-      <button class="btn-ghost" id="btn-copy" title="Copiar código">📋</button>
+  <div class="container lobby-container">
+    <div class="lobby-topbar">
+      <button class="btn-back" id="btn-leave-lobby">← Voltar</button>
+      <div class="lobby-mono-label">SALA DE ESPERA</div>
     </div>
-    <p class="hint">Compartilhe com os suspeitos</p>
 
-    <div id="lobby-players" class="players-list"></div>
+    <div class="code-section">
+      <div class="code-section-label">Código de acesso</div>
+      <div class="room-code-display">
+        <span id="show-code"></span>
+        <button class="btn-ghost" id="btn-copy" title="Copiar código">📋</button>
+      </div>
+      <p class="hint">Compartilhe com os suspeitos</p>
+    </div>
+
+    <div class="players-section">
+      <div class="players-list-header">
+        <span class="players-count">Suspeitos · <span id="lobby-count">0</span>/10</span>
+        <span class="live-indicator"><span class="live-dot">●</span> ao vivo</span>
+      </div>
+      <div id="lobby-players" class="players-list"></div>
+    </div>
 
     <div id="host-settings" class="settings-panel" style="display:none">
-      <h3>◆ Parâmetros da Investigação</h3>
+      <div class="settings-header">◆ Parâmetros da Investigação</div>
       <div class="setting-row">
-        <label class="setting-label">Categoria das palavras</label>
-        <select id="sel-category"></select>
+        <div class="setting-text">
+          <div class="setting-title">Categoria</div>
+          <div class="setting-sub">Conjunto de palavras</div>
+        </div>
+        <select id="sel-category" class="setting-control"></select>
       </div>
       <div class="setting-row">
-        <label class="setting-label">Número de impostores</label>
-        <select id="sel-impostor-count"></select>
+        <div class="setting-text">
+          <div class="setting-title">Impostores</div>
+          <div class="setting-sub">Quantos agentes infiltrados</div>
+        </div>
+        <select id="sel-impostor-count" class="setting-control"></select>
       </div>
-      <label class="toggle-row">
+      <label class="setting-row toggle-row">
+        <div class="setting-text">
+          <div class="setting-title">Palavra similar</div>
+          <div class="setting-sub">Impostor recebe dica</div>
+        </div>
         <input type="checkbox" id="chk-similar">
         <span class="toggle-track"></span>
-        Impostor recebe palavra similar
       </label>
     </div>
 
     <div id="host-start-area" style="display:none">
-      <button class="btn btn-primary" id="btn-start">Iniciar Investigação</button>
+      <button class="btn btn-primary lobby-start-btn" id="btn-start">▸ Iniciar Investigação</button>
     </div>
     <p id="lobby-waiting" class="waiting-label" style="display:none">Aguardando o host iniciar…</p>
   </div>
