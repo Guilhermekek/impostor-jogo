@@ -10,43 +10,103 @@ function showRoundResult(data) {
   const card        = document.getElementById('result-card');
   const hostActions = document.getElementById('result-host-actions');
 
-  if (data.tiedVote || !elimId) {
-    card.innerHTML = `
-      <div class="big-icon">🤝</div>
-      <div class="big-title">Empate!</div>
-      <div class="big-sub">Ninguém foi eliminado nessa rodada.</div>`;
+  const isTie         = data.tiedVote || !elimId;
+  const detectivesWon = !isTie && impostorIds.includes(elimId);
+  const detectivesLost = !isTie && !detectivesWon;
+
+  // Variant content (stamp / headline / subtitle)
+  let stamp, variant, headline, subtitle;
+  if (isTie) {
+    stamp    = '◇ EMPATE ◇';
+    variant  = 'tie';
+    headline = 'Ninguém eliminado';
+    subtitle = 'A votação empatou. A investigação continua.';
+  } else if (detectivesWon) {
+    stamp    = '◆ CASO RESOLVIDO ◆';
+    variant  = 'win';
+    headline = 'Você acertou';
+    const multi = impostorIds.length > 1;
+    subtitle = `${escHtml(elimName)} era ${multi ? 'um' : 'o'} impostor. Os detetives venceram esta rodada.`;
   } else {
-    const wasImpostor = impostorIds.includes(elimId);
-    card.innerHTML = `
-      <div class="big-icon">⚡</div>
-      <div class="big-title">${escHtml(elimName)} foi eliminado!</div>
-      <div class="big-sub">${wasImpostor ? '🎉 Era um impostor!' : 'Mas não era impostor…'}</div>`;
+    stamp    = '◈ IMPOSTOR ESCAPOU ◈';
+    variant  = 'loss';
+    headline = 'Você errou';
+    subtitle = `${escHtml(elimName)} era inocente. O impostor continua à solta.`;
   }
+
+  // Word reveal: APENAS na vitória — derrota oferece revanche com mesma palavra,
+  // então mostrar a palavra quebraria a mecânica do jogo.
+  let wordBox = '';
+  if (detectivesWon) {
+    const pair = getWordPair(data);
+    wordBox = `
+      <div class="result-word-box">
+        <div class="result-word-label">A PALAVRA ERA</div>
+        <div class="result-word">${escHtml(pair.word)}</div>
+      </div>`;
+  }
+
+  // Confetti — só na vitória
+  let confetti = '';
+  if (detectivesWon) {
+    const palette = ['var(--primary)', 'var(--success)', 'var(--text-dim)', 'oklch(0.50 0.10 80)'];
+    confetti = Array.from({ length: 22 }, (_, i) => {
+      const left  = (i * 7 + 3) % 100;
+      const color = palette[i % 4];
+      const dur   = 2.4 + (i % 5) * 0.3;
+      const delay = 0.6 + (i * 0.07) % 2;
+      return `<span class="result-confetti" style="left:${left}%;background:${color};animation-duration:${dur}s;animation-delay:${delay}s;"></span>`;
+    }).join('');
+  }
+
+  card.className = `result-card-noir result-${variant}`;
+  card.innerHTML = `
+    ${confetti}
+    <div class="result-grain-pulse"></div>
+    <div class="result-content">
+      <div class="result-stamp">${stamp}</div>
+      <div class="result-headline display">${headline}</div>
+      <div class="result-subtitle">${subtitle}</div>
+      ${wordBox}
+    </div>`;
 
   // Build host actions dynamically — what makes sense depends on the outcome
   if (S.isHost) {
-    const detectivesWon = elimId && impostorIds.includes(elimId);
-
     if (detectivesWon) {
-      // Detetives pegaram um impostor — nova palavra faz sentido
       hostActions.innerHTML = `
-        <button class="btn btn-primary"   id="btn-continue">Próxima rodada · nova palavra</button>
+        <button class="btn btn-primary"   id="btn-continue">▸ Próxima rodada · nova palavra</button>
         <button class="btn btn-secondary" id="btn-end">Encerrar jogo</button>`;
       document.getElementById('btn-continue').addEventListener('click', continueNewWord);
+    } else if (isTie) {
+      hostActions.innerHTML = `
+        <button class="btn btn-primary"   id="btn-continue-same">▸ Continuar com mesma palavra</button>
+        <button class="btn btn-secondary" id="btn-continue-new">Nova palavra</button>
+        <button class="btn btn-secondary" id="btn-end">Encerrar jogo</button>`;
+      document.getElementById('btn-continue-same').addEventListener('click', continueGame);
+      document.getElementById('btn-continue-new').addEventListener('click', continueNewWord);
     } else {
       // Impostor sobreviveu — oferecer revanche com a mesma palavra
       hostActions.innerHTML = `
-        <button class="btn btn-primary"   id="btn-continue-same">Revanche · mesma palavra</button>
-        <button class="btn btn-secondary" id="btn-continue-new">Próxima rodada · nova palavra</button>
-        <button class="btn btn-secondary" id="btn-end">Encerrar jogo</button>
-        <p class="hint" style="font-style:italic;margin-top:4px;">
-          O impostor sobreviveu — a revanche dá aos detetives outra chance com as dicas que já têm.</p>`;
+        <button class="btn btn-primary"   id="btn-continue-same">▸ Revanche · mesma palavra</button>
+        <button class="btn btn-secondary" id="btn-continue-new">Próxima rodada com nova palavra</button>
+        <button class="btn btn-secondary" id="btn-end">Encerrar jogo</button>`;
       document.getElementById('btn-continue-same').addEventListener('click', continueGame);
       document.getElementById('btn-continue-new').addEventListener('click', continueNewWord);
     }
 
     document.getElementById('btn-end').addEventListener('click', endGame);
     hostActions.style.display = 'flex';
+
+    // Aplica animação de subida + pulse no botão primário (delays escalonados)
+    const pulseName = detectivesWon ? 'ra-pulse-success' : detectivesLost ? 'ra-pulse-danger' : 'ra-pulse-primary';
+    hostActions.querySelectorAll('.btn').forEach((b, i) => {
+      const rise = `ra-btn-rise 0.4s ease-out ${2.6 + i * 0.12}s forwards`;
+      const pulse = b.classList.contains('btn-primary')
+        ? `, ${pulseName} 2.2s ease-in-out ${3.4 + i * 0.12}s infinite`
+        : '';
+      b.style.opacity = '0';
+      b.style.animation = rise + pulse;
+    });
   } else {
     hostActions.style.display = 'none';
   }
